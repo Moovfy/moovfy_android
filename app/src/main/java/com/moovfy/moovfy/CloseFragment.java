@@ -1,6 +1,7 @@
 package com.moovfy.moovfy;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -14,12 +15,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
 
 /**
@@ -81,6 +85,8 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             @Override
             public void onItemClick(Usuario user) {
                 Log.d("Listener Activat","Click en l'usuari" + user.getUsername());
+                Intent intent = new Intent(getContext(),ChatActivity.class);
+                startActivity(intent);
             }
         });
         recyclerListClose.setAdapter(adapter);
