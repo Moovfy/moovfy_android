@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/relative_layout_cahts"
+    android:id="@+id/relative_layout_black_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.moovfy.moovfy.ChatsActivity">
+    tools:context="com.moovfy.moovfy.BlackListActivity">
 
     <!-- TODO: Update blank fragment layout -->
     <android.support.v4.widget.SwipeRefreshLayout
@@ -13,7 +13,7 @@
         android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycleListChats"
+            android:id="@+id/recycleBlackList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="15dp" />

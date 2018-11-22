@@ -20,6 +20,9 @@ android {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
     }
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {
@@ -48,13 +51,14 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.google.firebase:firebase-auth:16.0.5'
-
     implementation 'com.android.volley:volley:1.1.1'
     implementation('io.nlopez.smartlocation:library:3.3.3') {
         transitive = false;
     }
     //Google maps utility for clustering
     implementation 'com.google.maps.android:android-maps-utils:0.5+'
+
+    implementation 'agency.tango.android:material-intro-screen:0.0.5'
 
     //locations
     implementation 'com.google.android.gms:play-services-location:16.0.0'

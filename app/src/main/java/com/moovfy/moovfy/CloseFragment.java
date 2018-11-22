@@ -2,6 +2,7 @@ package com.moovfy.moovfy;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -19,6 +20,20 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -33,7 +48,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
     private RecyclerView recyclerListClose;
     private ListCloseAdapter adapter;
-    List<Usuario> userList;
+    List<Usuario> userList = new ArrayList<>();
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
@@ -50,37 +65,16 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
-        userList = new ArrayList<>();
-        userList.add(new Usuario(
-                "Usuario1",
-                "Descripcion del user1",
-                R.drawable.icono
-        ));
-        userList.add(new Usuario(
-                "Usuario2",
-                "Descripcion del user2",
-                R.drawable.icono
-        ));
-        userList.add(new Usuario(
-                "Usuario3",
-                "Descripcion del user3",
-                R.drawable.icono
-        ));
-        userList.add(new Usuario(
-                "Usuario4",
-                "Descripcion del user4",
-                R.drawable.icono
-        ));
-        userList.add(new Usuario(
-                "Usuario5",
-                "Descripcion del user5",
-                R.drawable.icono
-        ));
-        userList.add(new Usuario(
-                "Usuario6",
-                "Descripcion del user6",
-                R.drawable.icono
-        ));
+        String url = "http://10.4.41.143:3000/near/";
+        FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
+        if (currentFirebaseUser != null) {
+            url += currentFirebaseUser.getUid();
+        } else {
+            Log.d("APIResponse3: ", "> " + "Usuari null");
+        }
+        Log.d("UrlRequested: ", "> " + url);
+        new JsonTask().execute(url);
+
         adapter = new ListCloseAdapter(getContext(), userList, new ListCloseAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Usuario user) {
@@ -115,18 +109,89 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     }
 
     private void updateList() {
-        userList.clear();
-        Random rand = new Random();
-        int n = rand.nextInt(10) + 1;
-        for (int i = 0; i < n; i++) {
-            userList.add(new Usuario(
-                    "Usuario " + i,
-                    "Descripcion del user " + i,
-                    R.drawable.icono
-            ));
+        String url = "http://10.4.41.143:3000/near/";
+        FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
+        if (currentFirebaseUser != null) {
+            url += currentFirebaseUser.getUid();
+        } else {
+            Log.d("APIResponse3: ", "> " + "Usuari null");
         }
+        Log.d("UrlRequested: ", "> " + url);
+        new JsonTask().execute(url);
         adapter.notifyDataSetChanged();
         mSwipeRefreshLayout.setRefreshing(false);
+    }
+
+    private class JsonTask extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            HttpURLConnection connection = null;
+            BufferedReader reader = null;
+
+            try {
+                URL url = new URL(params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+
+                InputStream stream = connection.getInputStream();
+
+                reader = new BufferedReader(new InputStreamReader(stream));
+
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line+"\n");
+                    Log.d("APIResponse: ", "> " + line);
+                }
+
+                return buffer.toString();
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            userList.clear();
+            try {
+
+                JSONArray jsonArray = new JSONArray(s);
+                if (jsonArray != null) {
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject e = jsonArray.getJSONObject(i);
+                        userList.add(new Usuario(
+                                "Usuario con uid " + e.getString("uid"),
+                                "Descripcion: Relacio: " + e.getString("relation"),
+                                R.drawable.icono
+                        ));
+                    }
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Log.d("APIResponse2: ", "> " + s);
+
+
+
+        }
     }
 }
 
