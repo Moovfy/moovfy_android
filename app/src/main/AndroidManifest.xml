@@ -55,11 +55,15 @@
             android:name=".ChatsActivity"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name=".PasswordReset"
-            android:parentActivityName=".LoginActivity" />
-        <activity
-            android:name=".EditProfile"
-            android:parentActivityName=".MainActivity" />
-    </application>
+            android:name=".MoovfyIntro"
+            android:theme="@style/Theme.Intro" />
+         <activity
+            android:name=".BlackListActivity"
+            android:parentActivityName=".MainActivity"></activity>
+      
+        <activity android:name=".PasswordReset" />
+        <activity android:name=".EditProfile" />
+      
+  </application>
 
 </manifest>
