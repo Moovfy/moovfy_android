@@ -225,7 +225,10 @@ public class MainActivity extends AppCompatActivity
            startActivity(intent);
         } else if (id == R.id.nav_invite) {
 
-        } else if (id == R.id.nav_help) {
+        } else if (id == R.id.nav_black_list) {
+           Intent intent = new Intent(this, BlackListActivity.class);
+           startActivity(intent);
+       } else if (id == R.id.nav_help) {
 
            Intent intent = new Intent(this, HelpActivity.class);
            startActivity(intent);

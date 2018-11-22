@@ -60,6 +60,9 @@
         <activity
             android:name=".EditProfile"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".BlackListActivity"
+            android:parentActivityName=".MainActivity"></activity>
     </application>
 
 </manifest>
