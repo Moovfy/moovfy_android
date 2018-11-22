@@ -23,7 +23,7 @@
         android:id="@+id/email"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="112dp"
+        android:layout_marginTop="60dp"
         android:layout_marginBottom="45dp"
         android:ems="10"
         android:hint="Email"
@@ -76,11 +76,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/login" />
 
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/sign_in_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="140dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/register"/>
+
+
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="316dp"
-        android:layout_height="227dp"
+        android:layout_width="207dp"
+        android:layout_height="185dp"
         android:layout_marginEnd="28dp"
         app:layout_constraintBottom_toTopOf="@+id/login"
         app:layout_constraintEnd_toEndOf="parent"

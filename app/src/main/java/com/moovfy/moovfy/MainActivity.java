@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity
             Intent login = new Intent(getApplicationContext(),LoginActivity.class);
             startActivity(login);
         }
-
+        
         SmartLocation.with(getApplicationContext()).location().start(locationListener);
         queue = Volley.newRequestQueue(this);
 
@@ -216,6 +216,8 @@ public class MainActivity extends AppCompatActivity
             // Handle the camera action
         } else if (id == R.id.nav_edit_profile) {
 
+           Intent intent = new Intent(this, EditProfile.class);
+           startActivity(intent);
         } else if (id == R.id.nav_invite) {
 
         } else if (id == R.id.nav_help) {

@@ -36,7 +36,7 @@ dependencies {
     // optional - Firebase JobDispatcher support
     implementation "android.arch.work:work-firebase:$work_version"
 
-
+    implementation 'com.google.android.gms:play-services-auth:16.0.1'
     implementation 'com.google.android.gms:play-services-analytics:16.0.5'
     implementation 'com.google.firebase:firebase-core:16.0.5'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
