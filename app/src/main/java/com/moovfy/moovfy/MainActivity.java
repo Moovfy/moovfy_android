@@ -50,6 +50,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -86,6 +88,8 @@ public class MainActivity extends AppCompatActivity
     TabItem tabClose;
     TabItem tabFriend;
     //----------------------
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
