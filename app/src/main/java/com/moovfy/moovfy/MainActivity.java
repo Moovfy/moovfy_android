@@ -86,11 +86,7 @@ public class MainActivity extends AppCompatActivity
             Intent login = new Intent(getApplicationContext(),LoginActivity.class);
             startActivity(login);
         }
-
-        if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
-            Toast.makeText(MainActivity.this, "Por favor active el GPS del teléfono!", Toast.LENGTH_SHORT).show();
-        }
-
+        
         SmartLocation.with(getApplicationContext()).location().start(locationListener);
         queue = Volley.newRequestQueue(this);
 
@@ -117,7 +113,6 @@ public class MainActivity extends AppCompatActivity
             correo.setText(us);
         }
         navigationView.setNavigationItemSelectedListener(this);
-
 
         //----------------------------- TABS
         tabLayout = findViewById(R.id.tablayout);
@@ -243,6 +238,7 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
     //LOCATION FUNCTIONS
     OnLocationUpdatedListener locationListener = new OnLocationUpdatedListener() {
         @Override
