@@ -20,6 +20,8 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,9 +36,12 @@ import static java.lang.System.currentTimeMillis;
 
 public class ChatActivity extends AppCompatActivity {
 
+    static {
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+    }
     private RecyclerView mMessageRecycler;
     private MessageListAdapter mMessageAdapter;
-    private FirebaseDatabase database;
+    private static FirebaseDatabase database;
     private DatabaseReference DatabaseReference;
     private static final int UPLOAD_IMAGE = 1;
     private String Chat_UID;
@@ -52,22 +57,17 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
+
         database = FirebaseDatabase.getInstance();
-        String uid1 = "120920929209";
-        String uid2 = " 5050503940349094";
-
-        Chat_UID = get_chat_uid( uid1,  uid2);
-
-        DatabaseReference = database.getReference("messages").child(Chat_UID);
-        /*
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        String uid = currentUser.getUid();
-        String nombre  = currentUser.getDisplayName();
-        String email = currentUser.getEmail();
-        Uri avatar = currentUser.getPhotoUrl();
-        */
+        String uid1 = currentUser.getUid();
+        String uid2 = " 5050503940349094";
+
+        Chat_UID = get_chat_uid(uid1, uid2);
+
+        DatabaseReference = database.getReference("messages").child(Chat_UID);
 
         String nombre  = "David";
         String username = "davidrasto";
