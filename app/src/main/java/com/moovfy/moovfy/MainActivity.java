@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+//coment
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -185,7 +185,6 @@ public class MainActivity extends AppCompatActivity
             correo.setText(us);
         }
         navigationView.setNavigationItemSelectedListener(this);
-
 
         //----------------------------- TABS
         tabLayout = findViewById(R.id.tablayout);
@@ -293,7 +292,10 @@ public class MainActivity extends AppCompatActivity
            startActivity(intent);
         } else if (id == R.id.nav_invite) {
 
-        } else if (id == R.id.nav_help) {
+        } else if (id == R.id.nav_black_list) {
+           Intent intent = new Intent(this, BlackListActivity.class);
+           startActivity(intent);
+       } else if (id == R.id.nav_help) {
 
            Intent intent = new Intent(this, HelpActivity.class);
            startActivity(intent);
@@ -311,6 +313,7 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
     //LOCATION FUNCTIONS
     OnLocationUpdatedListener locationListener = new OnLocationUpdatedListener() {
         @Override
