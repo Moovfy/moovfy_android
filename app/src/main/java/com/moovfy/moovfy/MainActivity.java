@@ -2,6 +2,11 @@ package com.moovfy.moovfy;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -12,6 +17,8 @@ import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
@@ -36,14 +43,20 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.kosalgeek.android.photoutil.ImageLoader;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.FileNotFoundException;
 
 import io.nlopez.smartlocation.OnActivityUpdatedListener;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
@@ -61,6 +74,7 @@ public class MainActivity extends AppCompatActivity
     private RequestQueue queue;
     private LocationGooglePlayServicesProvider provider;
     private final int REQUEST_PERMISSION_PHONE_STATE = 1;
+    Button chan;
 
     /*
      * Tabs
@@ -104,10 +118,33 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        Bundle bundle = getIntent().getExtras();
+        String path_p = null;
+        if (bundle!= null) path_p = bundle.getString("path_photo");
+
+        Bitmap bitmap = null;
+        try {
+           if (path_p!= null) bitmap = ImageLoader.init().from(path_p).getBitmap();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
         View hview = navigationView.getHeaderView(0);
         TextView correo = hview.findViewById(R.id.correo);
+        ImageView prof = hview.findViewById(R.id.profile_image);
+        if (bitmap != null) prof.setImageBitmap(bitmap);
+
+        chan = hview.findViewById(R.id.but);
+        chan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent change_i = new Intent(getApplicationContext(),choose_image.class);
+                startActivity(change_i);
+            }
+        });
 
 
         if (currentUser != null) {
@@ -115,6 +152,7 @@ public class MainActivity extends AppCompatActivity
             correo.setText(us);
         }
         navigationView.setNavigationItemSelectedListener(this);
+
 
 
         //----------------------------- TABS
@@ -150,6 +188,14 @@ public class MainActivity extends AppCompatActivity
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         //------------------------------------
 
+       /* chan = findViewById(R.id.but);
+        chan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent change_i = new Intent(getApplicationContext(),choose_image.class);
+                startActivity(change_i);
+            }
+        });*/
     }
 
     private void pasar_datos(JSONObject json) {
