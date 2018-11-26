@@ -168,16 +168,17 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         protected void onPostExecute(String s) {
             userList.clear();
             try {
-
-                JSONArray jsonArray = new JSONArray(s);
-                if (jsonArray != null) {
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject e = jsonArray.getJSONObject(i);
-                        userList.add(new Usuario(
-                                "Usuario con uid " + e.getString("uid"),
-                                "Descripcion: Relacio: " + e.getString("relation"),
-                                R.drawable.icono
-                        ));
+                if (s != null) {
+                    JSONArray jsonArray = new JSONArray(s);
+                    if (jsonArray != null) {
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject e = jsonArray.getJSONObject(i);
+                            userList.add(new Usuario(
+                                    "Usuario con uid " + e.getString("uid"),
+                                    "Descripcion: Relacio: " + e.getString("relation"),
+                                    R.drawable.icono
+                            ));
+                        }
                     }
                 }
 
