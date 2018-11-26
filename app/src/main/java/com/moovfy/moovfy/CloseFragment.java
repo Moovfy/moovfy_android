@@ -6,9 +6,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,6 +38,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
 
 
 /**
@@ -87,7 +90,21 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
        // inflater.inflate(R.menu.menu_calls, menu);
+        inflater.inflate(R.menu.menu_search, menu);
         inflater.inflate(R.menu.menu_refresh, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
 
     @Override
@@ -96,6 +113,9 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         if (item.getItemId() == R.id.menu_refresh) {
             updateList();
         }
+        if(item.getItemId() == R.id.action_search) {
+            search();
+        }
         return super.onOptionsItemSelected(item);
 
     }
@@ -103,6 +123,10 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     @Override
     public void onRefresh() {
         updateList();
+    }
+
+    private void search() {
+        System.out.println("SEARCH");
     }
 
     private void updateList() {

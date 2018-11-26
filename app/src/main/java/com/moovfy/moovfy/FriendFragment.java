@@ -90,6 +90,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // inflater.inflate(R.menu.menu_calls, menu);
+        inflater.inflate(R.menu.menu_search, menu);
         inflater.inflate(R.menu.menu_refresh, menu);
     }
 
@@ -99,6 +100,9 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
         if (item.getItemId() == R.id.menu_refresh) {
             updateList();
         }
+        if(item.getItemId() == R.id.action_search) {
+            search();
+        }
         return super.onOptionsItemSelected(item);
 
     }
@@ -106,6 +110,11 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
     @Override
     public void onRefresh() {
         updateList();
+    }
+
+
+    private void search() {
+
     }
 
     private void updateList() {
