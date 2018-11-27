@@ -72,7 +72,7 @@ public class ChatActivity extends AppCompatActivity {
         String nombre  = "David";
         String username = "davidrasto";
         String email = "david.rastobia";
-        Uri avatar = null;
+        String avatar = null;
 
         usuari = new User(email,username,avatar,nombre);
 
@@ -196,7 +196,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    public void Registrar_usuari_BD(String email,String usern,String firebase_uid,String name,Uri urlfoto){
+    public void Registrar_usuari_BD(String email,String usern,String firebase_uid,String name,String urlfoto){
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
         User usuari = new User(email,usern,urlfoto,name);

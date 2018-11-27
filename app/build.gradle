@@ -56,22 +56,27 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
     //Recycler view
     implementation 'com.android.support:recyclerview-v7:28.0.0'
+
+    
+
+
     //Rounded image
     implementation 'de.hdodenhof:circleimageview:2.2.0'
    
    //FIREBASE
-    implementation 'com.google.firebase:firebase-core:16.0.5'
+    implementation 'com.google.firebase:firebase-database:16.0.5'
+    implementation 'com.google.firebase:firebase-storage:16.0.5'
     implementation 'com.google.firebase:firebase-auth:16.0.5'
-    implementation 'com.google.firebase:firebase-database:16.0.3'
-    implementation 'com.google.firebase:firebase-storage:16.0.3'
+    implementation 'com.google.firebase:firebase-core:16.0.5'
     
   
     implementation 'com.github.bumptech.glide:glide:4.7.1'
+
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.github.chrisbanes:PhotoView:2.1.4'
     implementation 'com.android.support:palette-v7:28.0.0'
 
-
+    implementation 'com.github.bumptech.glide:glide:4.8.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
 }
 apply plugin: 'com.google.gms.google-services'

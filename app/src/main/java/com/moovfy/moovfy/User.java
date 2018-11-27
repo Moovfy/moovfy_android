@@ -6,13 +6,13 @@ public class User {
     String email;
     String username;
     String name;
-    Uri avatar;
+    String avatar;
 
 
     public User() {
     }
 
-    public User(String email, String username, Uri avatar,String name) {
+    public User(String email, String username, String avatar,String name) {
         this.email = email;
         this.username = username;
         this.avatar = avatar;
@@ -30,7 +30,7 @@ public class User {
 
 
 
-    public Uri getAvatar() {
+    public String getAvatar() {
         return avatar;
     }
 
@@ -42,7 +42,7 @@ public class User {
         this.username = username;
     }
 
-    public void setAvatar(Uri avatar) {
+    public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
 }
