@@ -46,12 +46,12 @@ import java.util.Random;
  * A simple {@link Fragment} subclass.
  */
 public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
-
+    public static final String EXTRA_MESSAGE = "";
     private RecyclerView recyclerListClose;
     private ListCloseAdapter adapter;
 
     List<User> userList = new ArrayList<>();
-
+    List<String> uids = new ArrayList<>();
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
@@ -67,13 +67,12 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
-
-
-        adapter = new ListCloseAdapter(getContext(), userList, new ListCloseAdapter.OnItemClickListener() {
+        adapter = new ListCloseAdapter(getContext(), userList,uids, new ListCloseAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(User user) {
-                Log.d("Listener Activat","Click en l'usuari" + user.getUsername());
+            public void onItemClick(String uid) {
+                Log.d("UIDagafat: ", "> " + uid);
                 Intent intent = new Intent(getContext(), ChatActivity.class);
+                intent.putExtra(EXTRA_MESSAGE, uid);
                 startActivity(intent);
             }
         });
@@ -137,13 +136,13 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
     }
 
-    public void Registrar_usuari_BD(String email,String usern,String firebase_uid,String name,String urlfoto, String desc){
+    public void Registrar_usuari_BD(String email,String usern,String firebase_uid,String urlfoto){
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        User usuari = new User(email,usern,urlfoto,name);
+        User usuari = new User(email,usern,urlfoto);
         mDatabase.child("users").child(firebase_uid).setValue(usuari);
         //User usuari = new User(email, usern,urlfoto);
-        mDatabase.push().setValue(urlfoto);
+
     }
     private class JsonTask extends AsyncTask<String, String, String> {
 
@@ -206,9 +205,9 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                     userList.add(new User(
                                             user.getString("email"),
                                             user.getString("username"),
-                                            avatar,
-                                            user.getString("complete_name")));
-
+                                            avatar
+                                            ));
+                                    uids.add(user.getString("_id"));
 
 
                                 } catch (MalformedURLException e5) {
@@ -280,17 +279,19 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 class ListCloseAdapter extends RecyclerView.Adapter<ListCloseAdapter.ItemCloseViewHolder> {
 
     public interface OnItemClickListener {
-        void onItemClick(User user);
+        void onItemClick(String uid);
     }
 
     private Context mCtx;
     private List<User> userList;
+    private List<String> uids;
     private final OnItemClickListener listener;
 
-    public ListCloseAdapter(Context mCtx, List<User> userList, OnItemClickListener listener) {
+    public ListCloseAdapter(Context mCtx, List<User> userList,List<String> uids, OnItemClickListener listener) {
         this.mCtx = mCtx;
         this.userList = userList;
         this.listener = listener;
+        this.uids = uids;
     }
 
     @NonNull
@@ -304,7 +305,7 @@ class ListCloseAdapter extends RecyclerView.Adapter<ListCloseAdapter.ItemCloseVi
     @Override
     public void onBindViewHolder(@NonNull ItemCloseViewHolder itemCloseViewHolder, int i) {
 
-        itemCloseViewHolder.bind(userList.get(i), listener);
+        itemCloseViewHolder.bind(userList.get(i),uids.get(i), listener);
     }
 
     @Override
@@ -327,7 +328,7 @@ class ListCloseAdapter extends RecyclerView.Adapter<ListCloseAdapter.ItemCloseVi
             imageView = itemView.findViewById(R.id.imageView);
         }
 
-        public void bind(final User user, final OnItemClickListener listener) {
+        public void bind(final User user, String uid, final OnItemClickListener listener) {
             textViewUsername.setText(user.getUsername());
             textViewDesc.setText(user.getEmail());
             GlideApp.with(mContext).load(user.getAvatar()).into(imageView);
@@ -337,7 +338,7 @@ class ListCloseAdapter extends RecyclerView.Adapter<ListCloseAdapter.ItemCloseVi
 
                 @Override
                 public void onClick(View v) {
-                    listener.onItemClick(user);
+                    listener.onItemClick(uid);
                 }
             });
         }

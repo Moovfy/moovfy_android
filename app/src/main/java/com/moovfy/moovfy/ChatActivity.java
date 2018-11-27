@@ -81,6 +81,7 @@ public class ChatActivity extends AppCompatActivity {
         Ref_uid2 = FirebaseDatabase.getInstance().getReference("users").child(uid2);
 
 
+
         Toolbar my_toolbar = findViewById(R.id.toolbar_chats);
         setSupportActionBar(my_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -235,6 +236,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
+
 
 
     public String get_chat_uid(String uid1, String uid2){

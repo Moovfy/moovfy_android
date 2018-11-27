@@ -125,7 +125,7 @@ public class Register extends AppCompatActivity {
                                 DatabaseReference mDatabase;
                                 mDatabase = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
                                 Log.d("Registre user a BD" , "Estic fent el push");
-                                User usuari = new User(email,usern,uri,name);
+                                User usuari = new User(email,usern,uri);
                                 mDatabase.setValue(usuari);
                             } catch (Exception e) {
                                 Log.e("URI Syntax Error: " , e.getMessage());

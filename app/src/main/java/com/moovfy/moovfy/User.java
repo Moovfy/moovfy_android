@@ -18,10 +18,11 @@ public class User {
         ChatsOberts = new ArrayList<>();
     }
 
-    public User(String email, String username, String avatar,String name) {
+    public User(String email, String username, String avatar) {
         this.email = email;
         this.username = username;
         this.avatar = avatar;
+
         ChatsOberts = new ArrayList<>();
         desc = "";
     }
