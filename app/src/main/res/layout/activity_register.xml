@@ -7,12 +7,6 @@
     tools:context=".Register">
 
 
-    android:id="@+id/linearLayout"
-    android:layout_width="match_parent"
-    android:layout_height="566dp"
-    tools:layout_editor_absoluteX="59dp"
-    tools:layout_editor_absoluteY="172dp">
-
     <TextView
         android:id="@+id/titulo"
         android:layout_width="176dp"
@@ -89,6 +83,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginStart="12dp"
         android:layout_marginBottom="85dp"
+        android:theme="@style/MyButton"
         android:text="Register" />
 
 
