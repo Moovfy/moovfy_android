@@ -2,11 +2,11 @@ package com.moovfy.moovfy;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -21,10 +21,10 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouchHelperChats.RecyclerItemTouchHelperChatsListener {
+public class BlackListActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
 
-    private RecyclerView recyclerListChats;
-    private ListChatsAdapter adapter;
+    private RecyclerView recyclerBlackList;
+    private BlackListAdapter adapter;
     List<Usuario> userList;
     private RelativeLayout relativeLayout;
 
@@ -33,17 +33,16 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chats);
-        setTitle("Chats");
+        setContentView(R.layout.activity_black_list);
+        setTitle("Black list");
 
+        relativeLayout = findViewById(R.id.relative_layout_black_list);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        recyclerListChats = (RecyclerView) findViewById(R.id.recycleListChats);
-        recyclerListChats.setLayoutManager(linearLayoutManager);
+        recyclerBlackList = (RecyclerView) findViewById(R.id.recycleBlackList);
+        recyclerBlackList.setLayoutManager(linearLayoutManager);
 
-        relativeLayout = findViewById(R.id.relative_layout_cahts);
-
-        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelperChats(0, ItemTouchHelper.LEFT, this);
-        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerListChats);
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerBlackList);
 
 
         userList = new ArrayList<>();
@@ -74,22 +73,22 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
         ));
         userList.add(new Usuario(
                 "Usuario6",
-                "Descripcion del user6",
+                "Descripcion del usersfsddddddddddddddddddddddddddddddf6",
                 R.drawable.icono
         ));
-        adapter = new ListChatsAdapter(this, userList, new ListChatsAdapter.OnItemClickListener() {
+
+        adapter = new BlackListAdapter(this, userList, new BlackListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Usuario user) {
                 Log.d("Listener Activat","Click en l'usuari" + user.getUsername());
             }
         });
-        recyclerListChats.setAdapter(adapter);
+        recyclerBlackList.setAdapter(adapter);
     }
-
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
-        if (viewHolder instanceof ListChatsAdapter.ItemChatViewHolder) {
+        if (viewHolder instanceof BlackListAdapter.ItemBlackListViewHolder) {
             // get the removed item name to display it in snack bar
             String name = userList.get(viewHolder.getAdapterPosition()).getUsername();
 
@@ -117,7 +116,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
     }
 }
 
-class ListChatsAdapter extends RecyclerView.Adapter<ListChatsAdapter.ItemChatViewHolder> {
+class BlackListAdapter extends RecyclerView.Adapter<BlackListAdapter.ItemBlackListViewHolder> {
 
     public interface OnItemClickListener {
         void onItemClick(Usuario user);
@@ -127,7 +126,7 @@ class ListChatsAdapter extends RecyclerView.Adapter<ListChatsAdapter.ItemChatVie
     private List<Usuario> userList;
     private final OnItemClickListener listener;
 
-    public ListChatsAdapter(Context mCtx, List<Usuario> userList, OnItemClickListener listener) {
+    public BlackListAdapter(Context mCtx, List<Usuario> userList, OnItemClickListener listener) {
         this.mCtx = mCtx;
         this.userList = userList;
         this.listener = listener;
@@ -149,14 +148,14 @@ class ListChatsAdapter extends RecyclerView.Adapter<ListChatsAdapter.ItemChatVie
 
     @NonNull
     @Override
-    public ItemChatViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+    public ItemBlackListViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater inflater = LayoutInflater.from(mCtx);
-        View view =  inflater.inflate(R.layout.item_chat, viewGroup,false);
-        return new ItemChatViewHolder(view);
+        View view =  inflater.inflate(R.layout.item_black_list, viewGroup,false);
+        return new ItemBlackListViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ItemChatViewHolder itemCloseViewHolder, int i) {
+    public void onBindViewHolder(@NonNull ItemBlackListViewHolder itemCloseViewHolder, int i) {
 
         itemCloseViewHolder.bind(userList.get(i), listener);
     }
@@ -167,22 +166,23 @@ class ListChatsAdapter extends RecyclerView.Adapter<ListChatsAdapter.ItemChatVie
     }
 
 
-    class ItemChatViewHolder extends RecyclerView.ViewHolder {
+
+
+    class ItemBlackListViewHolder extends RecyclerView.ViewHolder {
 
         TextView textViewUsername, textViewDesc;
         ImageView imageView;
-
         public RelativeLayout viewBackground, viewForeground;
 
-        public ItemChatViewHolder(@NonNull View itemView) {
+        public ItemBlackListViewHolder(@NonNull View itemView) {
             super(itemView);
 
             textViewUsername = itemView.findViewById(R.id.textViewUsername);
-            textViewDesc = itemView.findViewById(R.id.textViewLastMsg);
+            textViewDesc = itemView.findViewById(R.id.textViewShortDesc);
             imageView = itemView.findViewById(R.id.imageView);
 
-            viewBackground = itemView.findViewById(R.id.view_background_chats);
-            viewForeground = itemView.findViewById(R.id.view_foreground_chats);
+            viewBackground = itemView.findViewById(R.id.view_background);
+            viewForeground = itemView.findViewById(R.id.view_foreground);
         }
 
         public void bind(final Usuario user, final OnItemClickListener listener) {

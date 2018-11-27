@@ -66,6 +66,17 @@
         <activity
             android:name=".choose_image"
             android:parentActivityName=".MainActivity"/>
-    </application>
+        <activity
+            android:name=".ChatActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        </activity>
+            android:name=".MoovfyIntro"
+            android:theme="@style/Theme.Intro" />
+         <activity
+            android:name=".BlackListActivity"
+                   android:parentActivityName=".MainActivity"></activity>
+      
+  </application>
 
 </manifest>
