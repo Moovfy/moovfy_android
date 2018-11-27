@@ -16,7 +16,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -37,8 +36,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
 
 /**
@@ -79,7 +76,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             @Override
             public void onItemClick(Usuario user) {
                 Log.d("Listener Activat","Click en l'usuari" + user.getUsername());
-                Intent intent = new Intent(getContext(),ChatActivity.class);
+                Intent intent = new Intent(getContext(), HelpActivity.class);
                 startActivity(intent);
             }
         });
@@ -173,14 +170,15 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             try {
                 if (s != null) {
                     JSONArray jsonArray = new JSONArray(s);
-
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject e = jsonArray.getJSONObject(i);
-                        userList.add(new Usuario(
-                                "Usuario con uid " + e.getString("uid"),
-                                "Descripcion: Relacio: " + e.getString("relation"),
-                                R.drawable.icono
-                        ));
+                    if (jsonArray != null) {
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject e = jsonArray.getJSONObject(i);
+                            userList.add(new Usuario(
+                                    "Usuario con uid " + e.getString("uid"),
+                                    "Descripcion: Relacio: " + e.getString("relation"),
+                                    R.drawable.icono
+                            ));
+                        }
                     }
                 }
 
