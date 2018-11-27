@@ -95,11 +95,12 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
 
         Boolean firstRun = getSharedPreferences("PREFERENCE",MODE_PRIVATE).getBoolean("firstRun",true);
+        /*
         if(firstRun) {
             Intent intro = new Intent(getApplicationContext(),MoovfyIntro.class);
             startActivity(intro);
         }
-
+*/
 
 
         mAuth = FirebaseAuth.getInstance();
@@ -260,7 +261,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+       // getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
