@@ -74,7 +74,7 @@ public class ChatActivity extends AppCompatActivity {
         String email = "david.rastobia";
         String avatar = null;
 
-        usuari = new User(email,username,avatar,nombre);
+        usuari = new User(email,username,avatar);
 
         Toolbar my_toolbar = findViewById(R.id.toolbar_chats);
         setSupportActionBar(my_toolbar);
@@ -199,7 +199,7 @@ public class ChatActivity extends AppCompatActivity {
     public void Registrar_usuari_BD(String email,String usern,String firebase_uid,String name,String urlfoto){
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        User usuari = new User(email,usern,urlfoto,name);
+        User usuari = new User(email,usern,urlfoto);
         DatabaseReference.child("users").child(firebase_uid).setValue(usuari);
         //User usuari = new User(email, usern,urlfoto);
         mDatabase.push().setValue(urlfoto);
