@@ -102,7 +102,9 @@ public class MainActivity extends AppCompatActivity
     TabItem tabFriend;
     //----------------------
 
-
+    static {
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

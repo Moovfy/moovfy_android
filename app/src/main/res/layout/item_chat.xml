@@ -40,7 +40,7 @@
         android:background="@color/common_google_signin_btn_text_dark_default"
         android:padding="8dp">
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/imageView"
             android:layout_width="50dp"
             android:layout_height="50dp"

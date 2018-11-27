@@ -21,10 +21,20 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.FirebaseError;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,10 +76,11 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         recyclerListClose.setLayoutManager(linearLayoutManager);
         mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(this);
-
-        //Registrar_usuari_BD("lisa@simpson.com", "lisasimpson", "1","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Lisa Simpson");
-        //Registrar_usuari_BD("bart@simpson.com", "bartsimpson", "2","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Bart Simpson");
-
+/*
+        Registrar_usuari_BD("homer@simpson.com", "homersimpson", "3","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Homer Simpson");
+        Registrar_usuari_BD("marge@simpson.com", "margesimpson", "4","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Marge Simpson");
+        Registrar_usuari_BD("vallsortizpol@gmail.com", "polvallsortiz", "sIGgaYLgSxSXUelMuj7KqLle6FX2","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Pol Valls");
+*/
         adapter = new ListCloseAdapter(getContext(), userList,uids, new ListCloseAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(String uid) {
@@ -125,6 +136,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     }
 
     private void updateList() {
+        userList.clear();
         String url = "http://10.4.41.143:3000/near/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
@@ -134,7 +146,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         }
         Log.d("UrlRequested: ", "> " + url);
         JsonTask t = new JsonTask();
-        t.execute("http://10.4.41.143:3000/near/1");
+        t.execute("http://10.4.41.143:3000/near/2");
 
 
     }
@@ -204,14 +216,33 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                     JSONObject user = null;
 
                                     user = new JSONObject(s);
-                                    String avatar = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62";
+                                    String avatar ="";
+                                    /*
+                                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid).child("avatar");
+                                    ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            String value = (String) dataSnapshot.getValue();
+                                            Log.d("avatarurl: ", "> " + value);
+
+
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+
+                                    });
+                                    */
+                                    avatar = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62";
                                     userList.add(new User(
                                             user.getString("email"),
                                             user.getString("username"),
                                             avatar,
                                             user.getString("complete_name")
                                             ));
-                                    uids.add(user.getString("_id"));
+                                    uids.add(user.getString("firebase_uid"));
 
 
                                 } catch (MalformedURLException e5) {
@@ -333,7 +364,7 @@ class ListCloseAdapter extends RecyclerView.Adapter<ListCloseAdapter.ItemCloseVi
         }
 
         public void bind(final User user, String uid, final OnItemClickListener listener) {
-            textViewUsername.setText(user.getUsername());
+            textViewUsername.setText(user.getName());
             textViewDesc.setText(user.getEmail());
             GlideApp.with(mContext).load(user.getAvatar()).into(imageView);
 
