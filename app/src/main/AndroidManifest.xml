@@ -69,8 +69,8 @@
         <activity
             android:name=".ChatActivity"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        </activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity
             android:name=".MoovfyIntro"
             android:theme="@style/Theme.Intro" />
          <activity
