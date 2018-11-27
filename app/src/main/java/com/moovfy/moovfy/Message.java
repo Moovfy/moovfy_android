@@ -2,14 +2,16 @@ package com.moovfy.moovfy;
 
 public class Message {
     String message;
-    User sender;
+    String nomDest;
+    String senderUid;
     long time;
 
     public Message(){}
 
-    public Message(String message, User sender, long time) {
+    public Message(String message, String nomDest, String senderUid, long time) {
         this.message = message;
-        this.sender = sender;
+        this.senderUid = senderUid;
+        this.nomDest = nomDest;
         this.time = time;
     }
 
@@ -17,8 +19,20 @@ public class Message {
         return message;
     }
 
-    public User getSender() {
-        return sender;
+    public String getNomDest() {
+        return nomDest;
+    }
+
+    public void setNomDest(String nomDest) {
+        this.nomDest = nomDest;
+    }
+
+    public String getSenderUid() {
+        return senderUid;
+    }
+
+    public void setSenderUid(String senderUid) {
+        this.senderUid = senderUid;
     }
 
     public long getTime() {
@@ -29,9 +43,6 @@ public class Message {
         this.message = message;
     }
 
-    public void setSender(User sender) {
-        this.sender = sender;
-    }
 
     public void setTime(long time) {
         this.time = time;

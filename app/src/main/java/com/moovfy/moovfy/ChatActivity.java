@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -31,6 +32,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+
+import org.w3c.dom.Text;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -57,6 +60,9 @@ public class ChatActivity extends AppCompatActivity {
     DatabaseReference Ref_uid2;
     User usuari1;
     User usuari2;
+    String uid1;
+    String uid2;
+    private TextView nomuser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +74,10 @@ public class ChatActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        String uid1 = currentUser.getUid();
+        uid1 = "1";
 
         Intent intent = getIntent();
-        String uid2 = intent.getStringExtra(CloseFragment.EXTRA_MESSAGE);
+        uid2 = intent.getStringExtra(CloseFragment.EXTRA_MESSAGE);
 
 
         Chat_UID = get_chat_uid(uid1, uid2);
@@ -88,8 +94,9 @@ public class ChatActivity extends AppCompatActivity {
 
 
 
+
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.primary)));
-        getSupportActionBar().setTitle(usuari2.getName());
+        nomuser = (TextView) findViewById(R.id.action_bar_title_1);
         btnEnviar = (ImageButton) findViewById(R.id.button_chatbox_send);
         btnEnviarFoto = (Button) findViewById(R.id.btnEnviarFoto);
         txtMensaje  = (EditText) findViewById(R.id.edittext_chatbox);
@@ -119,6 +126,9 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Get Post object and use the values to update the UI
                 usuari2 = dataSnapshot.getValue(User.class);
+                Log.w("Chat22", usuari2.toString());
+                nomuser.setText(usuari2.getName());
+                Glide.with(ChatActivity.this).load(usuari2.getAvatar()).into(fotousuari);
             }
 
             @Override
@@ -135,13 +145,13 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String words = txtMensaje.getText().toString();
                 words = words.replace(System.getProperty("line.separator"), "");
-                Message mensaje = new Message(words,usuari,currentTimeMillis());
+                Message mensaje = new Message(words,usuari1.getName(),uid1,currentTimeMillis());
                 DatabaseReference.push().setValue(mensaje);
                 String m = mensaje.getMessage();
                 System.out.println("estoy escribiendo en la base de datos el mensaje " + m);
                 Log.d("Chat", "estoy escribiendo en la base de datos el mensaje " + m);
                 txtMensaje.setText("");
-                usuari.AddtoList(Chat_UID);
+                usuari1.AddtoList(Chat_UID);
                 usuari2.AddtoList(Chat_UID);
                 Ref_uid1.child("ChatsOberts").setValue(usuari1.getChatsOberts());
                 Ref_uid2.child("ChatsOberts").setValue(usuari2.getChatsOberts());
@@ -226,11 +236,11 @@ public class ChatActivity extends AppCompatActivity {
                 ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
-                        Message message = new Message(uri.toString(),usuari,System.currentTimeMillis());
+                        Message message = new Message(uri.toString(),usuari1.getName(),uid1,System.currentTimeMillis());
                         DatabaseReference.push().setValue(message);
 
 
-                        Glide.with(ChatActivity.this).load(uri.toString()).into(fotousuari);
+
                     }
                 });
             }
