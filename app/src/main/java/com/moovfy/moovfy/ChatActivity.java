@@ -221,14 +221,14 @@ public class ChatActivity extends AppCompatActivity {
                 if (data != null) {
                     final Uri uri = data.getData();
                     Log.d("Chat", "Uri: " + uri.toString());
-                    StorageReference storageReference = FirebaseStorage.getInstance().getReference("12345").child(uri.getLastPathSegment());
+                    StorageReference storageReference = FirebaseStorage.getInstance().getReference(Chat_UID).child(uri.getLastPathSegment());
                     putImageInStorage(storageReference, uri);
                 }
             }
         }
     }
 
-    private void putImageInStorage(StorageReference storageReference, Uri uri) {
+    public void putImageInStorage(StorageReference storageReference, Uri uri) {
         final StorageReference ref = storageReference.child("david");
         ref.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
