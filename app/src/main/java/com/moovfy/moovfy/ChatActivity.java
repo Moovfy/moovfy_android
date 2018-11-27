@@ -40,9 +40,7 @@ import static java.lang.System.currentTimeMillis;
 
 public class ChatActivity extends AppCompatActivity {
 
-    static {
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-    }
+
     private RecyclerView mMessageRecycler;
     private MessageListAdapter mMessageAdapter;
     private static FirebaseDatabase database;
@@ -74,7 +72,7 @@ public class ChatActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        uid1 = "1";
+        uid1 = "2"; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! hauria de ser la currentUid
 
         Intent intent = getIntent();
         uid2 = intent.getStringExtra(CloseFragment.EXTRA_MESSAGE);
@@ -145,7 +143,8 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String words = txtMensaje.getText().toString();
                 words = words.replace(System.getProperty("line.separator"), "");
-                Message mensaje = new Message(words,usuari1.getName(),uid1,currentTimeMillis());
+                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                Message mensaje = new Message(words,usuari2.getName(),uid1,currentTimeMillis());
                 DatabaseReference.push().setValue(mensaje);
                 String m = mensaje.getMessage();
                 System.out.println("estoy escribiendo en la base de datos el mensaje " + m);
@@ -251,9 +250,9 @@ public class ChatActivity extends AppCompatActivity {
 
     public String get_chat_uid(String uid1, String uid2){
         if(uid1.compareTo(uid2) < 0 ){
-            return uid1+uid2;
+            return uid1+ "|" + uid2;
         }
-        else return uid2+uid1;
+        else return uid2+ "|" + uid1;
     }
 
 }
