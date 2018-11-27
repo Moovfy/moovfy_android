@@ -67,10 +67,6 @@ public class Register extends AppCompatActivity {
         queue = Volley.newRequestQueue(this);
         regis.setOnClickListener(e-> registrarUsuario());
 
-
-
-
-
     }
     private boolean validarEmail(String email) {
         Pattern pattern = Patterns.EMAIL_ADDRESS;
@@ -88,7 +84,6 @@ public class Register extends AppCompatActivity {
             Toast.makeText(this, "Contraseñas diferentes", Toast.LENGTH_LONG).show();
             return;
         }
-        //System.out.println("email");
         //Verificamos que las cajas de texto no esten vacías
         if (email.equals("")) {
             Toast.makeText(this, "Se debe ingresar un email", Toast.LENGTH_LONG).show();
@@ -122,7 +117,6 @@ public class Register extends AppCompatActivity {
                             String usern = user_t.getText().toString().trim();
                             String name = name_t.getText().toString().trim();
 
-                            String message;
                             JSONObject json = new JSONObject();
 
                             try {
@@ -146,8 +140,6 @@ public class Register extends AppCompatActivity {
                                 e.printStackTrace();
                             }
 
-                            message = json.toString();
-                            System.out.println(message);
                             pasar_datos(json);
 
                             user.sendEmailVerification();

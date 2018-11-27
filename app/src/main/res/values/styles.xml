@@ -8,6 +8,12 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="MyButton" parent="Theme.AppCompat.Light">
+        <!-- Customize your theme here. -->
+        <item name="colorControlHighlight">@color/colorIndigo</item>
+        <item name="colorButtonNormal">@color/colorPrimary</item>
+    </style>
+
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>

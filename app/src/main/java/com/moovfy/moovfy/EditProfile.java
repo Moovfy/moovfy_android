@@ -17,8 +17,6 @@ public class EditProfile extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     Button mod_b;
-    EditText name_t;
-    EditText username_t;
     EditText email_t;
     EditText pass_t;
 
@@ -30,37 +28,16 @@ public class EditProfile extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         mod_b =  findViewById(R.id.cambiar);
-        name_t = findViewById(R.id.editName);
-        username_t = findViewById(R.id.editUsername);
         email_t = findViewById(R.id.editEmail);
         pass_t = findViewById(R.id.editPassword);
 
         mod_b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name = name_t.getText().toString().trim();
-                String username = username_t.getText().toString().trim();
                 String email = email_t.getText().toString().trim();
                 String pass = pass_t.getText().toString().trim();
 
                 FirebaseUser user = mAuth.getCurrentUser();
-
-                if (!name.equals("")) {
-
-                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                            .setDisplayName(name)
-                            .build();
-
-                    user.updateProfile(profileUpdates)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-
-                                    }
-                                }
-                            });
-                }
 
                 if(!email.equals("")) {
                     user.updateEmail(email);
