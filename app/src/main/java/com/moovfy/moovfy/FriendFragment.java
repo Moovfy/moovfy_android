@@ -38,10 +38,10 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
-        View layout = inflater.inflate(R.layout.fragment_close, container, false);
+        View layout = inflater.inflate(R.layout.fragment_friends, container, false);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
-        recyclerListFriends = (RecyclerView) layout.findViewById(R.id.recycleListClose);
+        recyclerListFriends = (RecyclerView) layout.findViewById(R.id.recycleListFriends);
         recyclerListFriends.setLayoutManager(linearLayoutManager);
         mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(this);
@@ -77,7 +77,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                 "Descripcion del user6",
                 R.drawable.icono
         ));
-        adapter = new ListFriendsAdapter(getContext(), userList, new ListCloseAdapter.OnItemClickListener() {
+        adapter = new ListFriendsAdapter(getContext(), userList, new ListFriendsAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Usuario user) {
                 Log.d("Listener Activat","Click en l'usuari" + user.getUsername());
@@ -132,9 +132,9 @@ class ListFriendsAdapter extends RecyclerView.Adapter<ListFriendsAdapter.ItemFri
 
     private Context mCtx;
     private List<Usuario> userList;
-    private final ListCloseAdapter.OnItemClickListener listener;
+    private final ListFriendsAdapter.OnItemClickListener listener;
 
-    public ListFriendsAdapter(Context mCtx, List<Usuario> userList, ListCloseAdapter.OnItemClickListener listener) {
+    public ListFriendsAdapter(Context mCtx, List<Usuario> userList, ListFriendsAdapter.OnItemClickListener listener) {
         this.mCtx = mCtx;
         this.userList = userList;
         this.listener = listener;
@@ -171,7 +171,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<ListFriendsAdapter.ItemFri
             imageView = itemView.findViewById(R.id.imageView);
         }
 
-        public void bind(final Usuario user, final ListCloseAdapter.OnItemClickListener listener) {
+        public void bind(final Usuario user, final ListFriendsAdapter.OnItemClickListener listener) {
             textViewUsername.setText(user.getUsername());
             textViewDesc.setText(user.getDesc());
             imageView.setImageDrawable(mCtx.getResources().getDrawable(user.getIcon()));
