@@ -17,6 +17,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -48,12 +50,32 @@ public class MessageListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public int getItemViewType(int position) {
         Message message = (Message) mMessageList.get(position);
         String[] parts = message.getMessage().split(Pattern.quote(".")); // Split on period.
+
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        String uid = currentUser.getUid();
+        uid = "1";
         if(parts[0].equals("https://firebasestorage")) {
             Log.d("Chat", "foto");
-            Random rand = new Random();
 
-            int  n = rand.nextInt(4) + 2;
-            return 3;
+            if (message.getSenderUid().equals(uid)) {
+                // If the current user is the sender of the message
+                return VIEW_TYPE_IMAGE_SENT;
+            } else {
+                // If some other user sent the message
+                return VIEW_TYPE_IMAGE_RECEIVED;
+            }
+        }
+        else {
+            Log.d("Chat", "foto");
+
+            if (message.getSenderUid().equals(uid)) {
+                // If the current user is the sender of the message
+                return VIEW_TYPE_MESSAGE_SENT;
+            } else {
+                // If some other user sent the message
+                return VIEW_TYPE_MESSAGE_RECEIVED;
+            }
         }
         /*
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -68,13 +90,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             return VIEW_TYPE_MESSAGE_RECEIVED;
         }
         */
-        else {
-            Log.d("Chat", "entro en el getItemviewType");
-            Random rand = new Random();
 
-            int n = rand.nextInt(2) + 1;
-            return 2;
-        }
     }
 
     // Inflates the appropriate layout according to the ViewType.
@@ -215,7 +231,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
             // Format the stored timestamp into a readable String using method.
             timeText.setText(formatDateTime(message.getTime()));
-            nameText.setText(message.getSender().getUsername());
+            nameText.setText(message.getNomDest());
         }
     }
 
@@ -270,7 +286,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             // Format the stored timestamp into a readable String using method.
             timeText.setText(formatDateTime(message.getTime()));
 
-            nameText.setText(message.getSender().getUsername());
+            nameText.setText(message.getNomDest());
         }
     }
 

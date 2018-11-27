@@ -67,6 +67,9 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
+        //Registrar_usuari_BD("lisa@simpson.com", "lisasimpson", "1","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Lisa Simpson");
+        //Registrar_usuari_BD("bart@simpson.com", "bartsimpson", "2","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Bart Simpson");
+
         adapter = new ListCloseAdapter(getContext(), userList,uids, new ListCloseAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(String uid) {
@@ -136,10 +139,10 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
     }
 
-    public void Registrar_usuari_BD(String email,String usern,String firebase_uid,String urlfoto){
+    public void Registrar_usuari_BD(String email,String usern,String firebase_uid,String urlfoto, String name){
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        User usuari = new User(email,usern,urlfoto);
+        User usuari = new User(email,usern,urlfoto,name);
         mDatabase.child("users").child(firebase_uid).setValue(usuari);
         //User usuari = new User(email, usern,urlfoto);
 
@@ -205,7 +208,8 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                     userList.add(new User(
                                             user.getString("email"),
                                             user.getString("username"),
-                                            avatar
+                                            avatar,
+                                            user.getString("complete_name")
                                             ));
                                     uids.add(user.getString("_id"));
 
