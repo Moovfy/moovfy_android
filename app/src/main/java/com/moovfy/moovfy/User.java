@@ -2,20 +2,27 @@ package com.moovfy.moovfy;
 
 import android.net.Uri;
 
-public class User {
-    String email;
-    String username;
-    String name;
-    Uri avatar;
+import java.util.ArrayList;
+import java.util.List;
 
+public class User {
+    private String email;
+    private String username;
+    private String name;
+    private String avatar;
+    private List<String> ChatsOberts;
+    private String desc;
 
     public User() {
+        ChatsOberts = new ArrayList<>();
     }
 
-    public User(String email, String username, Uri avatar,String name) {
+    public User(String email, String username, String avatar,String name) {
         this.email = email;
         this.username = username;
         this.avatar = avatar;
+        ChatsOberts = new ArrayList<>();
+        desc = "";
     }
 
     public String getEmail() {
@@ -29,8 +36,15 @@ public class User {
     }
 
 
+    public String getName() {
+        return name;
+    }
 
-    public Uri getAvatar() {
+    public List<String> getChatsOberts() {
+        return ChatsOberts;
+    }
+
+    public String getAvatar() {
         return avatar;
     }
 
@@ -42,8 +56,32 @@ public class User {
         this.username = username;
     }
 
-    public void setAvatar(Uri avatar) {
+    public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setChatsOberts(List<String> chatsOberts) {
+        ChatsOberts = chatsOberts;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public void AddtoList(String chat_uid){
+        if(ChatsOberts.contains(chat_uid)){
+            ChatsOberts.remove(chat_uid);
+        }
+        ChatsOberts.add(0,chat_uid);
+    }
+
 }
 

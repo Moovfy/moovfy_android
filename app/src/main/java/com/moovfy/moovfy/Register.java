@@ -31,6 +31,8 @@ import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -116,6 +118,18 @@ public class Register extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             String usern = user_t.getText().toString().trim();
                             String name = name_t.getText().toString().trim();
+
+                            try{
+                                String uri = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62";
+                                Log.d("URI created: ",uri.toString());
+                                DatabaseReference mDatabase;
+                                mDatabase = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
+                                Log.d("Registre user a BD" , "Estic fent el push");
+                                User usuari = new User(email,usern,uri,name);
+                                mDatabase.setValue(usuari);
+                            } catch (Exception e) {
+                                Log.e("URI Syntax Error: " , e.getMessage());
+                            }
 
                             JSONObject json = new JSONObject();
 
