@@ -67,6 +67,15 @@
             android:text="Descripcion"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small" />
 
+        <TextView
+            android:id="@+id/textViewLastTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/textViewLastMsg"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="18dp"
+            android:text="TextView" />
+
 
     </RelativeLayout>
 

@@ -54,7 +54,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         String uid = currentUser.getUid();
-        uid = "2";
+        uid = "2";// !!!!!!!!!!!!!!!!!!!!
         if(parts[0].equals("https://firebasestorage")) {
             Log.d("Chat", "foto");
 
