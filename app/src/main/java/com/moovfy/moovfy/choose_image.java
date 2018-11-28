@@ -1,5 +1,6 @@
 package com.moovfy.moovfy;
 
+import android.arch.persistence.room.Database;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -7,6 +8,7 @@ import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,6 +16,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.kosalgeek.android.photoutil.CameraPhoto;
 import com.kosalgeek.android.photoutil.GalleryPhoto;
 import com.kosalgeek.android.photoutil.ImageLoader;
@@ -83,6 +93,7 @@ public class choose_image extends AppCompatActivity {
 
                 Intent intent = new Intent(this, MainActivity.class);
                 intent.putExtra("path_photo", photoPath);
+                putImageInStorage(data);
                 startActivity(intent);
 
             }
@@ -94,12 +105,33 @@ public class choose_image extends AppCompatActivity {
 
                 Intent intent = new Intent(this, MainActivity.class);
                 intent.putExtra("path_photo", photoPath);
+                putImageInStorage(data);
                 startActivity(intent);
-
             }
         }
     }
-
+    protected void putImageInStorage(Intent data) {
+        if (data != null) {
+            final Uri uri = data.getData();
+            Log.d("Chat", "Uri: " + uri.toString());
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference("Perfil").child(uri.getLastPathSegment());
+            storageReference.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                            FirebaseUser currentUser = mAuth.getCurrentUser();
+                            String uid = currentUser.getUid();
+                            DatabaseReference Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child(uid).child("avatar");
+                            Ref_uid1.setValue(uri.toString());
+                        }
+                    });
+                }
+            });
+        }
+    }
 
 
 }
