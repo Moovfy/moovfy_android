@@ -45,7 +45,8 @@
             android:label="@string/title_activity_login" />
         <activity
             android:name=".Register"
-            android:label="@string/title_activity_register" />
+            android:label="@string/title_activity_register"
+            android:parentActivityName=".LoginActivity"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -53,6 +54,7 @@
 
         <activity
             android:name=".HelpActivity"
+            android:label="About"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".ChatsActivity"
@@ -62,6 +64,7 @@
             android:parentActivityName=".LoginActivity" />
         <activity
             android:name=".EditProfile"
+            android:label="Edit Profile"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".choose_image"

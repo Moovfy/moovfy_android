@@ -77,14 +77,16 @@
 
     <Button
         android:id="@+id/register2"
-        android:layout_width="139dp"
-        android:layout_height="58dp"
+        android:layout_width="168dp"
+        android:layout_height="46dp"
         android:layout_alignStart="@+id/titulo"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="-9dp"
         android:layout_marginBottom="85dp"
-        android:theme="@style/MyButton"
-        android:text="Register" />
+        android:background="@drawable/frame"
+        android:text="Register"
+        android:textStyle="bold"
+        android:theme="@style/MyButton" />
 
 
 </RelativeLayout>
