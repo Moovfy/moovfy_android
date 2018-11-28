@@ -18,7 +18,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Authenticator;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -43,6 +49,9 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 import com.google.android.gms.*;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -54,8 +63,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     EditText user_t;
     EditText pas_t;
     private ProgressDialog progressDialog;
+    private RequestQueue queue;
     private static final int SIGN_IN_CODE = 777;
-    private GoogleApiClient googleApiClient;
     private GoogleSignInClient mGoogleSignInClient;
 
 
@@ -79,6 +88,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         pas_t = findViewById(R.id.password);
 
         progressDialog = new ProgressDialog(this);
+        queue = Volley.newRequestQueue(this);
 
        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -118,33 +128,23 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             }
         });
 
-
-
-
     }
     public void showLocationPermission() {
         int permissionCheck = ContextCompat.checkSelfPermission(
                 this, android.Manifest.permission.ACCESS_FINE_LOCATION);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(LoginActivity.this, "No se tiene permiso para obtener la ubicación", Toast.LENGTH_SHORT).show();
-            ActivityCompat.requestPermissions(this, new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.READ_EXTERNAL_STORAGE}, 225);
+            //Toast.makeText(LoginActivity.this, "No se tiene permiso para obtener la ubicación", Toast.LENGTH_SHORT).show();
+            ActivityCompat.requestPermissions(this, new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 225);
         }
-        /*else {
-            Toast.makeText(LoginActivity.this, "Se tiene permiso!", Toast.LENGTH_SHORT).show();
-        }*/
     }
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case 225:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-
                 }else {
-
                 }
                 return;
         }
-
     }
     private boolean validarEmail(String email) {
         Pattern pattern = Patterns.EMAIL_ADDRESS;
@@ -210,10 +210,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
-
-                // [START_EXCLUDE]
-                // [END_EXCLUDE]
+                // Google Sign In failed
             }
             handleSignInResult(result);
         }
@@ -223,7 +220,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         if (result.isSuccess()) {
             firebaseAuthWithGoogle(result.getSignInAccount());
         } else {
-            Toast.makeText(this, "Not log!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ya registrado!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -235,7 +232,35 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
 
                 if (task.isSuccessful()) {
-                    //mAuth.getCurrentUser().sendEmailVerification();
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    String usern = user.getEmail();
+                    String email = user.getEmail();
+                    String name = user.getDisplayName();
+
+                    JSONObject json = new JSONObject();
+
+                    try {
+                        json.put("email", email);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        json.put("complete_name", name);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        json.put("username", usern);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        json.put("firebase_uid", user.getUid());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    pasar_datos(json);
                     getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putString("user_uid",mAuth.getCurrentUser().getUid()).commit();
                     Intent main = new Intent(getApplicationContext(),MainActivity.class);
                     startActivity(main);
@@ -248,6 +273,24 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         });
     }
 
+    private void pasar_datos(JSONObject json) {
+        String url = "http://10.4.41.143:3000/users/register";
+
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                    }
+                }
+        ){
+        };
+        queue.add(jsonobj);
+    }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {

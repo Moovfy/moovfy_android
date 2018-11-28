@@ -4,6 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -15,6 +20,8 @@ import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
@@ -50,14 +57,21 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.kosalgeek.android.photoutil.ImageLoader;
+import com.google.firebase.database.FirebaseDatabase;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.FileNotFoundException;
 
 import io.nlopez.smartlocation.OnActivityUpdatedListener;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
@@ -74,7 +88,8 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAuth mAuth;
     private RequestQueue queue;
     private LocationGooglePlayServicesProvider provider;
-    private final int REQUEST_PERMISSION_PHONE_STATE=1;
+    private final int REQUEST_PERMISSION_PHONE_STATE = 1;
+    Button chan;
     final static int REQUEST_LOCATION = 199;
 
     /*
@@ -87,25 +102,30 @@ public class MainActivity extends AppCompatActivity
     TabItem tabFriend;
     //----------------------
 
+    static {
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         Boolean firstRun = getSharedPreferences("PREFERENCE",MODE_PRIVATE).getBoolean("firstRun",true);
+        /*
         if(firstRun) {
             Intent intro = new Intent(getApplicationContext(),MoovfyIntro.class);
             startActivity(intro);
         }
-
+*/
 
 
         mAuth = FirebaseAuth.getInstance();
 
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        String firebase_uid = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user_uid","");
+        String firebase_uid = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user_uid", "");
 
         if (firebase_uid.equals("")) { // || currentUser == null
-            Intent login = new Intent(getApplicationContext(),LoginActivity.class);
+            Intent login = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(login);
         }
 
@@ -159,8 +179,6 @@ public class MainActivity extends AppCompatActivity
             });
         }
 
-        SmartLocation.with(getApplicationContext()).location().start(locationListener);
-        queue = Volley.newRequestQueue(this);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -174,10 +192,33 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        Bundle bundle = getIntent().getExtras();
+        String path_p = null;
+        if (bundle!= null) path_p = bundle.getString("path_photo");
+
+        Bitmap bitmap = null;
+        try {
+           if (path_p!= null) bitmap = ImageLoader.init().from(path_p).getBitmap();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
         View hview = navigationView.getHeaderView(0);
         TextView correo = hview.findViewById(R.id.correo);
+        ImageView prof = hview.findViewById(R.id.profile_image);
+        if (bitmap != null) prof.setImageBitmap(bitmap);
+
+        chan = hview.findViewById(R.id.but);
+        chan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent change_i = new Intent(getApplicationContext(),choose_image.class);
+                startActivity(change_i);
+            }
+        });
 
 
         if (currentUser != null) {
@@ -219,12 +260,20 @@ public class MainActivity extends AppCompatActivity
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         //------------------------------------
 
+       /* chan = findViewById(R.id.but);
+        chan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent change_i = new Intent(getApplicationContext(),choose_image.class);
+                startActivity(change_i);
+            }
+        });*/
     }
 
     private void pasar_datos(JSONObject json) {
         String url = "http://10.4.41.143:3000/locations/addLocation";
 
-        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url,json,
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url, json,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -256,7 +305,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+       // getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -281,15 +330,15 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-       if (id == R.id.nav_chat) {
+        if (id == R.id.nav_chat) {
 
-           Intent intent = new Intent(this, ChatsActivity.class);
-           startActivity(intent);
+            Intent intent = new Intent(this, ChatsActivity.class);
+            startActivity(intent);
             // Handle the camera action
         } else if (id == R.id.nav_edit_profile) {
 
-           Intent intent = new Intent(this, EditProfile.class);
-           startActivity(intent);
+            Intent intent = new Intent(this, EditProfile.class);
+            startActivity(intent);
         } else if (id == R.id.nav_invite) {
 
         } else if (id == R.id.nav_black_list) {
@@ -297,16 +346,14 @@ public class MainActivity extends AppCompatActivity
            startActivity(intent);
        } else if (id == R.id.nav_help) {
 
-           Intent intent = new Intent(this, HelpActivity.class);
-           startActivity(intent);
-
-        } else if (id == R.id.nav_settings) {
+            Intent intent = new Intent(this, HelpActivity.class);
+            startActivity(intent);
 
         } else if (id == R.id.nav_logout) {
-           FirebaseAuth.getInstance().signOut();
-           getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putString("user_uid","").commit();
-           Intent login = new Intent(getApplicationContext(),LoginActivity.class);
-           startActivity(login);
+            FirebaseAuth.getInstance().signOut();
+            getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit().putString("user_uid", "").commit();
+            Intent login = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(login);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

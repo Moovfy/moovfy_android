@@ -19,6 +19,9 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-feature android:name="android.hardware.camera2" android:required="true"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -42,7 +45,8 @@
             android:label="@string/title_activity_login" />
         <activity
             android:name=".Register"
-            android:label="@string/title_activity_register" />
+            android:label="@string/title_activity_register"
+            android:parentActivityName=".LoginActivity"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -50,19 +54,31 @@
 
         <activity
             android:name=".HelpActivity"
+            android:label="About"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".ChatsActivity"
             android:parentActivityName=".MainActivity" />
         <activity
+            android:name=".PasswordReset"
+            android:parentActivityName=".LoginActivity" />
+        <activity
+            android:name=".EditProfile"
+            android:label="Edit Profile"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".choose_image"
+            android:parentActivityName=".MainActivity"/>
+        <activity
+            android:name=".ChatActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity
             android:name=".MoovfyIntro"
             android:theme="@style/Theme.Intro" />
          <activity
             android:name=".BlackListActivity"
-            android:parentActivityName=".MainActivity"></activity>
-      
-        <activity android:name=".PasswordReset" />
-        <activity android:name=".EditProfile" />
+                   android:parentActivityName=".MainActivity"></activity>
       
   </application>
 

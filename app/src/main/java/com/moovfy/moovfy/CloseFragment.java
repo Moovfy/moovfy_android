@@ -2,9 +2,11 @@ package com.moovfy.moovfy;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,8 +21,20 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.FirebaseError;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,11 +56,12 @@ import java.util.Random;
  * A simple {@link Fragment} subclass.
  */
 public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
-
+    public static final String EXTRA_MESSAGE = "";
     private RecyclerView recyclerListClose;
     private ListCloseAdapter adapter;
-    List<Usuario> userList = new ArrayList<>();
 
+    List<User> userList = new ArrayList<>();
+    List<String> uids = new ArrayList<>();
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
@@ -61,27 +76,36 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         recyclerListClose.setLayoutManager(linearLayoutManager);
         mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(this);
-
-        String url = "http://10.4.41.143:3000/near/";
-        FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
-        if (currentFirebaseUser != null) {
-            url += currentFirebaseUser.getUid();
-        } else {
-            Log.d("APIResponse3: ", "> " + "Usuari null");
-        }
-        Log.d("UrlRequested: ", "> " + url);
-        new JsonTask().execute(url);
-
-        adapter = new ListCloseAdapter(getContext(), userList, new ListCloseAdapter.OnItemClickListener() {
+/*
+        Registrar_usuari_BD("homer@simpson.com", "homersimpson", "3","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Homer Simpson");
+        Registrar_usuari_BD("marge@simpson.com", "margesimpson", "4","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Marge Simpson");
+        Registrar_usuari_BD("vallsortizpol@gmail.com", "polvallsortiz", "sIGgaYLgSxSXUelMuj7KqLle6FX2","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Pol Valls");
+*/
+        adapter = new ListCloseAdapter(getContext(), userList,uids, new ListCloseAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(Usuario user) {
-                Log.d("Listener Activat","Click en l'usuari" + user.getUsername());
-                Intent intent = new Intent(getContext(), HelpActivity.class);
+            public void onItemClick(String uid) {
+                Log.d("UIDagafat: ", "> " + uid);
+                Intent intent = new Intent(getContext(), ChatActivity.class);
+                intent.putExtra(EXTRA_MESSAGE, uid);
                 startActivity(intent);
             }
         });
+
         recyclerListClose.setAdapter(adapter);
+
         return layout;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+                updateList();
+            }
+        });
     }
 
     @Override
@@ -94,7 +118,13 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == R.id.menu_refresh) {
-            updateList();
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                    updateList();
+                }
+            });
         }
         return super.onOptionsItemSelected(item);
 
@@ -106,6 +136,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     }
 
     private void updateList() {
+        userList.clear();
         String url = "http://10.4.41.143:3000/near/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
@@ -114,11 +145,20 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             Log.d("APIResponse3: ", "> " + "Usuari null");
         }
         Log.d("UrlRequested: ", "> " + url);
-        new JsonTask().execute(url);
-        adapter.notifyDataSetChanged();
-        mSwipeRefreshLayout.setRefreshing(false);
+        JsonTask t = new JsonTask();
+        t.execute("http://10.4.41.143:3000/near/2");
+
+
     }
 
+    public void Registrar_usuari_BD(String email,String usern,String firebase_uid,String urlfoto, String name){
+        DatabaseReference mDatabase;
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        User usuari = new User(email,usern,urlfoto,name);
+        mDatabase.child("users").child(firebase_uid).setValue(usuari);
+        //User usuari = new User(email, usern,urlfoto);
+
+    }
     private class JsonTask extends AsyncTask<String, String, String> {
 
         @Override
@@ -142,6 +182,98 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                     buffer.append(line+"\n");
                     Log.d("APIResponse: ", "> " + line);
                 }
+                try {
+                    if (buffer.toString() != null) {
+
+                        JSONArray jsonArray = new JSONArray(buffer.toString());
+                        if (jsonArray != null) {
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject e = jsonArray.getJSONObject(i);
+                                String uid = e.getString("uid");
+                                String newurl = "http://10.4.41.143:3000/users/" + uid;
+                                HttpURLConnection connection2 = null;
+                                BufferedReader reader2 = null;
+
+                                try {
+                                    URL url2 = new URL(newurl);
+                                    connection2 = (HttpURLConnection) url2.openConnection();
+                                    connection2.connect();
+
+                                    InputStream stream2 = connection2.getInputStream();
+
+                                    reader2 = new BufferedReader(new InputStreamReader(stream2));
+
+                                    StringBuffer buffer2 = new StringBuffer();
+                                    String line2 = "";
+
+                                    while ((line2 = reader2.readLine()) != null) {
+                                        buffer2.append(line2+"\n");
+                                        Log.d("APIResponse2: ", "> " + line2);
+                                    }
+
+                                    String s = buffer2.toString();
+                                    Log.d("buffer2: ", "> " + s);
+                                    JSONObject user = null;
+
+                                    user = new JSONObject(s);
+                                    String avatar ="";
+                                    /*
+                                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid).child("avatar");
+                                    ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            String value = (String) dataSnapshot.getValue();
+                                            Log.d("avatarurl: ", "> " + value);
+
+
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+
+                                    });
+                                    */
+                                    avatar = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62";
+                                    userList.add(new User(
+                                            user.getString("email"),
+                                            user.getString("username"),
+                                            avatar,
+                                            user.getString("complete_name")
+                                            ));
+                                    uids.add(user.getString("firebase_uid"));
+
+
+                                } catch (MalformedURLException e5) {
+                                    e5.printStackTrace();
+                                } catch (IOException e3) {
+                                    e3.printStackTrace();
+                                } finally {
+                                    if (connection2 != null) {
+                                        connection2.disconnect();
+                                    }
+                                    try {
+                                        if (reader2 != null) {
+                                            reader2.close();
+                                        }
+                                    } catch (IOException e2) {
+                                        e2.printStackTrace();
+                                    }
+                                }
+
+
+                            }
+                        }
+
+
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
 
                 return buffer.toString();
 
@@ -166,46 +298,35 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
         @Override
         protected void onPostExecute(String s) {
-            userList.clear();
-            try {
 
-                JSONArray jsonArray = new JSONArray(s);
-                if (jsonArray != null) {
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject e = jsonArray.getJSONObject(i);
-                        userList.add(new Usuario(
-                                "Usuario con uid " + e.getString("uid"),
-                                "Descripcion: Relacio: " + e.getString("relation"),
-                                R.drawable.icono
-                        ));
-                    }
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            Log.d("APIResponse2: ", "> " + s);
-
-
+            Log.d("UrlRequestedss: ", "> " + s);
+            adapter.notifyDataSetChanged();
+            mSwipeRefreshLayout.setRefreshing(false);
 
         }
+
+
     }
+
+
 }
 
 class ListCloseAdapter extends RecyclerView.Adapter<ListCloseAdapter.ItemCloseViewHolder> {
 
     public interface OnItemClickListener {
-        void onItemClick(Usuario user);
+        void onItemClick(String uid);
     }
 
     private Context mCtx;
-    private List<Usuario> userList;
+    private List<User> userList;
+    private List<String> uids;
     private final OnItemClickListener listener;
 
-    public ListCloseAdapter(Context mCtx, List<Usuario> userList, OnItemClickListener listener) {
+    public ListCloseAdapter(Context mCtx, List<User> userList,List<String> uids, OnItemClickListener listener) {
         this.mCtx = mCtx;
         this.userList = userList;
         this.listener = listener;
+        this.uids = uids;
     }
 
     @NonNull
@@ -213,13 +334,13 @@ class ListCloseAdapter extends RecyclerView.Adapter<ListCloseAdapter.ItemCloseVi
     public ItemCloseViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater inflater = LayoutInflater.from(mCtx);
         View view =  inflater.inflate(R.layout.item_friend, viewGroup,false);
-        return new ItemCloseViewHolder(view);
+        return new ItemCloseViewHolder(view, mCtx);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ItemCloseViewHolder itemCloseViewHolder, int i) {
 
-        itemCloseViewHolder.bind(userList.get(i), listener);
+        itemCloseViewHolder.bind(userList.get(i),uids.get(i), listener);
     }
 
     @Override
@@ -232,25 +353,27 @@ class ListCloseAdapter extends RecyclerView.Adapter<ListCloseAdapter.ItemCloseVi
 
         TextView textViewUsername, textViewDesc;
         ImageView imageView;
+        Context mContext;
 
-        public ItemCloseViewHolder(@NonNull View itemView) {
+        public ItemCloseViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
-
+            mContext = context;
             textViewUsername = itemView.findViewById(R.id.textViewUsername);
             textViewDesc = itemView.findViewById(R.id.textViewShortDesc);
             imageView = itemView.findViewById(R.id.imageView);
         }
 
-        public void bind(final Usuario user, final OnItemClickListener listener) {
-            textViewUsername.setText(user.getUsername());
-            textViewDesc.setText(user.getDesc());
-            imageView.setImageDrawable(mCtx.getResources().getDrawable(user.getIcon()));
+        public void bind(final User user, String uid, final OnItemClickListener listener) {
+            textViewUsername.setText(user.getName());
+            textViewDesc.setText(user.getEmail());
+            GlideApp.with(mContext).load(user.getAvatar()).into(imageView);
+
 
             itemView.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
-                    listener.onItemClick(user);
+                    listener.onItemClick(uid);
                 }
             });
         }
