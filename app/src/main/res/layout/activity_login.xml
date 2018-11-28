@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/common_google_signin_btn_text_dark_default"
     tools:context=".LoginActivity">
 
     <!-- Login progress --><!--[CDATA[
@@ -60,32 +61,39 @@
 
     <Button
         android:id="@+id/login"
-        android:layout_width="176dp"
-        android:layout_height="52dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="94dp"
+        android:layout_width="168dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="45dp"
+        android:layout_marginEnd="100dp"
+        android:background="@drawable/frame"
         android:text="Log In"
-        android:textAppearance="@style/TextAppearance.AppCompat.Button"
+        android:textStyle="bold"
+        android:theme="@style/MyButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/password" />
 
     <Button
         android:id="@+id/register"
-        android:layout_width="294dp"
-        android:layout_height="0dp"
-        android:layout_marginEnd="40dp"
+        android:layout_width="168dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="100dp"
+        android:background="@drawable/frame"
         android:text="Register"
+        android:textStyle="bold"
+        android:theme="@style/MyButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/login" />
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"
-        android:layout_width="wrap_content"
+        android:layout_width="168dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="110dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="100dp"
+        android:background="@drawable/frame2"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/register"/>
-
+        app:layout_constraintTop_toBottomOf="@+id/register" />
 
 
     <ImageView
@@ -100,7 +108,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.162"
         app:srcCompat="@drawable/icono" />
-
 
 
 </android.support.constraint.ConstraintLayout>
