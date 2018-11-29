@@ -26,6 +26,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
@@ -42,13 +43,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.moovfy.moovfy.MessageListAdapter.formatDateTime;
+
 public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouchHelperChats.RecyclerItemTouchHelperChatsListener, SwipeRefreshLayout.OnRefreshListener {
 
     public static final String EXTRA_MESSAGE = "";
     private RecyclerView recyclerListChats;
     private ListChatsAdapter adapter;
     List<User> userList = new ArrayList<>();
-    List<String> lastMsgList = new ArrayList<>();
     List<String> uids = new ArrayList<>();
     private RelativeLayout relativeLayout;
 
@@ -130,16 +132,19 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
     @Override
     public void onRefresh() {
         updateList();
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     private void updateList() {
 
         userList.clear();
+        uids.clear();
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
 
+        String uid = currentFirebaseUser.getUid();//currentFirebaseUser.getUid();
 
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11substituir child("2) per la uid actual del usuari
-        Ref = FirebaseDatabase.getInstance().getReference("users").child("2");
+
+        Ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
         ValueEventListener usuari1Listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -154,18 +159,63 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                     FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
                     if (currentFirebaseUser != null) {
                         currentuid = currentFirebaseUser.getUid();
+                      //  currentuid = "2"; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
                         Log.d("Current UId: ", "> " + currentuid);
                     } else {
                         Log.d("Current UId: ", "> " + "Usuari null");
                     }
-                    currentuid = "2"; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
                     for (String s : ids) {
                         if (!s.equals(currentuid)) {
 
+                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(s);
+                            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    User user =  dataSnapshot.getValue(User.class);
 
-                            Log.d("Executant s: ", "> " + s);
-                            JsonTask t = new JsonTask();
-                            t.execute("http://10.4.41.143:3000/users/" + s);
+
+                                    uids.add(s);
+
+                                    Query ref2 = FirebaseDatabase.getInstance().getReference("messages").child(chatid).orderByKey().limitToLast(1);
+                                    ref2.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                            String mm = "";
+                                            String time = "";
+                                            for (DataSnapshot child : dataSnapshot.getChildren()){
+
+                                                mm = child.child("message").getValue().toString();
+                                                time =  child.child("time").getValue().toString();
+
+                                            }
+                                            user.setEmail(mm); //ultim missatge guardat en el email
+                                            user.setDesc(time);
+
+                                            userList.add(user);
+
+                                            adapter.notifyDataSetChanged();
+                                            mSwipeRefreshLayout.setRefreshing(false);
+
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+
+                                    });
+
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+
+                            });
 
 
                         }
@@ -193,41 +243,44 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
 
             try {
                 URL url = new URL(params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
+                InputStream stream = connection.getInputStream();
 
-                HttpURLConnection connection2 = null;
-                BufferedReader reader2 = null;
+                reader = new BufferedReader(new InputStreamReader(stream));
 
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
 
-
-                connection2 = (HttpURLConnection) url.openConnection();
-                connection2.connect();
-
-                InputStream stream2 = connection2.getInputStream();
-
-                reader2 = new BufferedReader(new InputStreamReader(stream2));
-
-                StringBuffer buffer2 = new StringBuffer();
-                String line2 = "";
-
-                while ((line2 = reader2.readLine()) != null) {
-                    buffer2.append(line2+"\n");
-                    Log.d("APIResponse2: ", "> " + line2);
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line+"\n");
+                    Log.d("APIResponse: ", "> " + line);
                 }
+                try {
+                    if (buffer.toString() != null) {
 
-                String s = buffer2.toString();
-                Log.d("buffer2: ", "> " + s);
-                JSONObject user = null;
+                        JSONObject jsonObject = new JSONObject(buffer.toString());
+                        if (jsonObject != null) {
 
-                user = new JSONObject(s);
-                String avatar ="";
-                                /*
-                                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid).child("avatar");
+                                String uid = jsonObject.getString("firebase_uid");
+
+
+                                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
                                 ref.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
-                                        String value = (String) dataSnapshot.getValue();
-                                        Log.d("avatarurl: ", "> " + value);
+                                        User user =  dataSnapshot.getValue(User.class);
 
+                                        userList.add(new User(
+                                                user.getEmail(),
+                                                user.getUsername(),
+                                                user.getAvatar(),
+                                                user.getName()
+                                        ));
+                                        uids.add(uid);
+                                        adapter.notifyDataSetChanged();
 
                                     }
 
@@ -237,27 +290,25 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                                     }
 
                                 });
-                                */
-                avatar = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62";
-                userList.add(new User(
-                        user.getString("email"),
-                        user.getString("username"),
-                        avatar,
-                        user.getString("complete_name")
-                ));
-                uids.add(user.getString("firebase_uid"));
+
+
+                        }
+
+
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
 
 
 
-
-                return buffer2.toString();
+                return buffer.toString();
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
                 e.printStackTrace();
             } finally {
                 if (connection != null) {
@@ -344,7 +395,7 @@ class ListChatsAdapter extends RecyclerView.Adapter<ListChatsAdapter.ItemChatVie
 
     class ItemChatViewHolder extends RecyclerView.ViewHolder {
 
-        TextView textViewUsername, textViewLastMsg;
+        TextView textViewUsername, textViewLastMsg, textViewLastTime;
         ImageView imageView;
         Context mContext;
 
@@ -355,6 +406,7 @@ class ListChatsAdapter extends RecyclerView.Adapter<ListChatsAdapter.ItemChatVie
             mContext = context;
             textViewUsername = itemView.findViewById(R.id.textViewUsername);
             textViewLastMsg = itemView.findViewById(R.id.textViewLastMsg);
+            textViewLastTime = itemView.findViewById(R.id.textViewLastTime);
             imageView = itemView.findViewById(R.id.imageView);
 
             viewBackground = itemView.findViewById(R.id.view_background_chats);
@@ -363,7 +415,9 @@ class ListChatsAdapter extends RecyclerView.Adapter<ListChatsAdapter.ItemChatVie
 
         public void bind(final User user, String uid,final OnItemClickListener listener) {
             textViewUsername.setText(user.getName());
-            textViewLastMsg.setText(user.getDesc());
+            textViewLastMsg.setText(user.getEmail());
+            Long time = Long.parseLong(user.getDesc(),10);
+            textViewLastTime.setText(formatDateTime(time));
             GlideApp.with(mContext).load(user.getAvatar()).into(imageView);
 
 
@@ -375,5 +429,7 @@ class ListChatsAdapter extends RecyclerView.Adapter<ListChatsAdapter.ItemChatVie
                 }
             });
         }
+
+
     }
 }

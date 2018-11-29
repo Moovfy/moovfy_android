@@ -124,6 +124,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     private void updateList() {
         userList.clear();
+        uids.clear();
         String url = "http://10.4.41.143:3000/friends/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
@@ -133,7 +134,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
         }
         Log.d("UrlRequested: ", "> " + url);
         JsonTask t = new JsonTask();
-        t.execute("http://10.4.41.143:3000/friends/2");
+        t.execute(url);
     }
     private class JsonTask extends AsyncTask<String, String, String> {
 
@@ -146,7 +147,8 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                 URL url = new URL(params[0]);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.connect();
-
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
                 InputStream stream = connection.getInputStream();
 
                 reader = new BufferedReader(new InputStreamReader(stream));
@@ -166,78 +168,31 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject e = jsonArray.getJSONObject(i);
                                 String uid = e.getString("uid");
-                                String newurl = "http://10.4.41.143:3000/users/" + uid;
-                                HttpURLConnection connection2 = null;
-                                BufferedReader reader2 = null;
 
-                                try {
-                                    URL url2 = new URL(newurl);
-                                    connection2 = (HttpURLConnection) url2.openConnection();
-                                    connection2.connect();
 
-                                    InputStream stream2 = connection2.getInputStream();
+                                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
+                                ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        User user =  dataSnapshot.getValue(User.class);
 
-                                    reader2 = new BufferedReader(new InputStreamReader(stream2));
+                                        userList.add(new User(
+                                                user.getEmail(),
+                                                user.getUsername(),
+                                                user.getAvatar(),
+                                                user.getName()
+                                        ));
+                                        uids.add(uid);
+                                        adapter.notifyDataSetChanged();
 
-                                    StringBuffer buffer2 = new StringBuffer();
-                                    String line2 = "";
-
-                                    while ((line2 = reader2.readLine()) != null) {
-                                        buffer2.append(line2+"\n");
-                                        Log.d("APIResponse2: ", "> " + line2);
                                     }
 
-                                    String s = buffer2.toString();
-                                    Log.d("buffer2: ", "> " + s);
-                                    JSONObject user = null;
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                    user = new JSONObject(s);
-                                    String avatar ="";
-                                    /*
-                                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid).child("avatar");
-                                    ref.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            String value = (String) dataSnapshot.getValue();
-                                            Log.d("avatarurl: ", "> " + value);
-
-
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                        }
-
-                                    });
-                                    */
-                                    avatar = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62";
-                                    userList.add(new User(
-                                            user.getString("email"),
-                                            user.getString("username"),
-                                            avatar,
-                                            user.getString("complete_name")
-                                    ));
-                                    uids.add(user.getString("firebase_uid"));
-
-
-                                } catch (MalformedURLException e5) {
-                                    e5.printStackTrace();
-                                } catch (IOException e3) {
-                                    e3.printStackTrace();
-                                } finally {
-                                    if (connection2 != null) {
-                                        connection2.disconnect();
                                     }
-                                    try {
-                                        if (reader2 != null) {
-                                            reader2.close();
-                                        }
-                                    } catch (IOException e2) {
-                                        e2.printStackTrace();
-                                    }
-                                }
 
+                                });
 
                             }
                         }
@@ -248,6 +203,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
 
 
 
@@ -276,7 +232,6 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
         protected void onPostExecute(String s) {
 
             Log.d("UrlRequestedss: ", "> " + s);
-            adapter.notifyDataSetChanged();
             mSwipeRefreshLayout.setRefreshing(false);
 
         }

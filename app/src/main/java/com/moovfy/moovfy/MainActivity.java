@@ -57,6 +57,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.kosalgeek.android.photoutil.ImageLoader;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -102,9 +106,10 @@ public class MainActivity extends AppCompatActivity
     TabItem tabFriend;
     //----------------------
 
-    static {
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-    }
+    ImageView ivImage; // avatar
+    DatabaseReference Ref_uid1;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +133,10 @@ public class MainActivity extends AppCompatActivity
             Intent login = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(login);
         }
+
+
+
+
 
         if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
             GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
@@ -268,6 +277,45 @@ public class MainActivity extends AppCompatActivity
                 startActivity(change_i);
             }
         });*/
+
+
+        mAuth = FirebaseAuth.getInstance();
+
+
+        FirebaseUser currentUser2 = mAuth.getCurrentUser();
+
+        Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child(currentUser2.getUid());//currentUser.getUid()!!!!!!!!!!!!!!!!!!!!!!!!!
+        Log.w("UUUUUU", currentUser2.getUid());
+        ValueEventListener usuari1Listener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Get Post object and use the values to update the UI
+
+
+
+                User u = dataSnapshot.getValue(User.class);
+                Log.w("aaaaaaaaaaaaaaaaaaaaa", u.getAvatar());
+                if (u != null) {
+                    if (ivImage == null) {
+                        Log.w("imagenulll", u.getAvatar());
+                    }
+                    ivImage = (ImageView) findViewById(R.id.profile_image);
+
+                    GlideApp.with(getApplicationContext()).load(u.getAvatar()).into(ivImage);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w("Chat", "loadUser1:onCancelled", databaseError.toException());
+            }
+        };
+        Ref_uid1.addValueEventListener(usuari1Listener);
+
+
+
     }
 
     private void pasar_datos(JSONObject json) {
