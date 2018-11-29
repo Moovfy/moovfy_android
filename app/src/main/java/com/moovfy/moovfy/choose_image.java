@@ -124,6 +124,7 @@ public class choose_image extends AppCompatActivity {
                             FirebaseAuth mAuth = FirebaseAuth.getInstance();
                             FirebaseUser currentUser = mAuth.getCurrentUser();
                             String uid = currentUser.getUid();
+                            //uid = "2"; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                             DatabaseReference Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child(uid).child("avatar");
                             Ref_uid1.setValue(uri.toString());
                         }
