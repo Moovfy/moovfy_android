@@ -1,6 +1,7 @@
 package com.moovfy.moovfy;
 
 import android.Manifest;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -32,7 +33,13 @@ public class MoovfyIntro extends MaterialIntroActivity {
                 .description("necessitem revisar els permisos de l'aplicació")
                 .build());
 
-        getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putBoolean("firstRun",false).commit();
 
+    }
+
+    @Override
+    public void onFinish() {
+        getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putBoolean("firstRun",false).commit();
+        Intent main = new Intent(getApplicationContext(),MainActivity.class);
+        startActivity(main);
     }
 }
