@@ -147,7 +147,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         }
         Log.d("UrlRequested: ", "> " + url);
         JsonTask t = new JsonTask();
-        t.execute("http://10.4.41.143:3000/near/2");
+        t.execute(url);
 
 
     }

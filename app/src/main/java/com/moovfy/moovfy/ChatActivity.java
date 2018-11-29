@@ -73,7 +73,7 @@ public class ChatActivity extends AppCompatActivity {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         uid1 = currentUser.getUid();
-        uid1 = "2";
+        //uid1 = "2";
 
         Intent intent = getIntent();
         uid2 = intent.getStringExtra(CloseFragment.EXTRA_MESSAGE);

@@ -282,10 +282,10 @@ public class MainActivity extends AppCompatActivity
         mAuth = FirebaseAuth.getInstance();
 
 
-        currentUser = mAuth.getCurrentUser();
+        FirebaseUser currentUser2 = mAuth.getCurrentUser();
 
-        Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child("2");//currentUser.getUid()!!!!!!!!!!!!!!!!!!!!!!!!!
-        Log.w("UUUUUU", currentUser.getUid());
+        Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child(currentUser2.getUid());//currentUser.getUid()!!!!!!!!!!!!!!!!!!!!!!!!!
+        Log.w("UUUUUU", currentUser2.getUid());
         ValueEventListener usuari1Listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

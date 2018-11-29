@@ -141,7 +141,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
         uids.clear();
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
 
-        String uid = "2";//currentFirebaseUser.getUid();
+        String uid = currentFirebaseUser.getUid();//currentFirebaseUser.getUid();
 
 
         Ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
@@ -159,7 +159,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                     FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
                     if (currentFirebaseUser != null) {
                         currentuid = currentFirebaseUser.getUid();
-                        currentuid = "2"; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+                      //  currentuid = "2"; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
                         Log.d("Current UId: ", "> " + currentuid);
                     } else {
                         Log.d("Current UId: ", "> " + "Usuari null");

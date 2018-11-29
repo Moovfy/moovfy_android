@@ -134,7 +134,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
         }
         Log.d("UrlRequested: ", "> " + url);
         JsonTask t = new JsonTask();
-        t.execute("http://10.4.41.143:3000/friends/2");
+        t.execute(url);
     }
     private class JsonTask extends AsyncTask<String, String, String> {
 
