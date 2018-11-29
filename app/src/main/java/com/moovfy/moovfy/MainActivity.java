@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity
 
         mAuth = FirebaseAuth.getInstance();
 
-
+        queue = Volley.newRequestQueue(MainActivity.this);
         FirebaseUser currentUser = mAuth.getCurrentUser();
         String firebase_uid = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user_uid", "");
 
@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
-
+        SmartLocation.with(getApplicationContext()).location().start(locationListener);
         if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
             GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
                     .addApi(LocationServices.API)
@@ -416,7 +416,7 @@ public class MainActivity extends AppCompatActivity
             double lat = location.getLatitude();
             double lng = location.getLongitude();
             System.out.println("LOCATION CHANGED: latitude " + lat + " longitude " + lng);
-
+            Toast.makeText(getApplicationContext(),"LOCATION CHANGED: latitude " + lat + " longitude " + lng,Toast.LENGTH_LONG).show();
             String firebase_uid = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user_uid","");
             if(firebase_uid != "") {
                 FirebaseUser user = mAuth.getCurrentUser();
