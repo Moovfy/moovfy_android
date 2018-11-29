@@ -200,13 +200,16 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                         public void onDataChange(DataSnapshot dataSnapshot) {
                                             User user =  dataSnapshot.getValue(User.class);
 
-                                            userList.add(new User(
-                                                    user.getEmail(),
-                                                    user.getUsername(),
-                                                    user.getAvatar(),
-                                                    user.getName()
-                                            ));
-                                            uids.add(uid);
+
+                                            if(user != null) {
+                                                userList.add(new User(
+                                                        user.getEmail(),
+                                                        user.getUsername(),
+                                                        user.getAvatar(),
+                                                        user.getName()
+                                                ));
+                                                uids.add(uid);
+                                            }
                                             adapter.notifyDataSetChanged();
 
                                         }
