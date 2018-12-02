@@ -48,8 +48,11 @@ import java.util.regex.Pattern;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 import com.google.android.gms.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -242,18 +245,26 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     JSONObject json = new JSONObject();
 
 
+                    DatabaseReference mDatabase;
+                    mDatabase = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
+                    mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot snapshot) {
+                            if (snapshot.child("avatar").exists()) {
 
-                    try{
-                        String uri = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62";
-                        Log.d("URI created: ",uri.toString());
-                        DatabaseReference mDatabase;
-                        mDatabase = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
-                        Log.d("Registre user a BD" , "Estic fent el push");
-                        User usuari = new User(email,usern,uri,name);
-                        mDatabase.setValue(usuari);
-                    } catch (Exception e) {
-                        Log.e("URI Syntax Error: " , e.getMessage());
-                    }
+                            }
+                            else {
+                                String uri = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62";
+                                User usuari = new User(email,usern,uri,name);
+                                mDatabase.setValue(usuari);
+                            }
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            Log.e("GoogleError: " ,"Error en login amb Google");
+                        }
+                    });
+
 
                     try {
                         json.put("email", email);
