@@ -304,6 +304,9 @@ public class MainActivity extends AppCompatActivity
 
                             GlideApp.with(getApplicationContext()).load(u.getAvatar()).into(ivImage);
 
+                            TextView name = findViewById((R.id.username));
+                            name.setText(u.getName());
+
                         }
                     }
 
