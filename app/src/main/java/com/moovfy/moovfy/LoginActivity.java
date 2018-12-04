@@ -2,14 +2,18 @@ package com.moovfy.moovfy;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.design.shape.TriangleEdgeTreatment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -128,8 +132,30 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         forg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent reset = new Intent(getApplicationContext(),PasswordReset.class);
-                startActivity(reset);
+                AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                builder.setTitle("Put email");
+
+                final EditText input = new EditText(LoginActivity.this);
+                input.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS );
+                builder.setView(input);
+
+                builder.setPositiveButton("Send", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mAuth = FirebaseAuth.getInstance();
+                        mAuth.sendPasswordResetEmail(input.getText().toString());
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.show();
+
+
             }
         });
 
@@ -158,15 +184,15 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private void login(String email, String pas) {
 
         if (email.equals("")) {
-            Toast.makeText(this,"Introduzca el email", Toast.LENGTH_LONG).show();
+            user_t.setError("Email can not be empty!");
             return;
         }
         if (pas.equals("")) {
-            Toast.makeText(this,"Introduzca el password", Toast.LENGTH_LONG).show();
+            pas_t.setError("Password can not be empty!");
             return;
         }
         if (!validarEmail(email)) {
-            Toast.makeText(this, "Error en el formato del email", Toast.LENGTH_LONG).show();
+            user_t.setError("Format error on email!");
             return;
         }
 
@@ -179,7 +205,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         if (task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (!user.isEmailVerified()) {
-                                Toast.makeText(LoginActivity.this,"Correo electrónico no verificado", Toast.LENGTH_LONG).show();
+                                user_t.setError("Email not verified! Please go to your email tray!");
                                 return;
                             }
                             progressDialog.setMessage("Iniciando sessión...");
@@ -189,7 +215,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             startActivity(main);
                         } else {
                             Log.w( "signInUserWithEmail", task.getException());
-                            Toast.makeText(LoginActivity.this, "No se pudo iniciar sesión", Toast.LENGTH_LONG).show();
+                            pas_t.setError("Are you sure this information is correct?");
                         }
                         progressDialog.dismiss();
                     }
