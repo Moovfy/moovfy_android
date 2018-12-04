@@ -144,7 +144,9 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String words = txtMensaje.getText().toString();
                 words = words.replace(System.getProperty("line.separator"), "");
+
                 Message mensaje = new Message(words,usuari1.getName(),uid1,currentTimeMillis());
+
                 DatabaseReference.push().setValue(mensaje);
                 String m = mensaje.getMessage();
                 Log.d("Chat", "estoy escribiendo en la base de datos el mensaje " + m);

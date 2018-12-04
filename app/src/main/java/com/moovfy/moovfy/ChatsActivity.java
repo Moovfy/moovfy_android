@@ -95,6 +95,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
             public void run() {
                 mSwipeRefreshLayout.setRefreshing(true);
                 updateList();
+
             }
         });
     }
@@ -126,7 +127,47 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
             });
             snackbar.setActionTextColor(Color.YELLOW);
             snackbar.show();
+            snackbar.addCallback(new Snackbar.Callback(){
+                @Override
+                public void onShown(Snackbar sb) {
+                    super.onShown(sb);
+                }
+
+                @Override
+                public void onDismissed(Snackbar transientBottomBar, int event) {
+                    super.onDismissed(transientBottomBar, event);
+
+                    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                    FirebaseUser currentUser = mAuth.getCurrentUser();
+                    String myuid =  currentUser.getUid();
+                    String altreuid = uids.get(deletedIndex);
+                    String chatuid = get_chat_uid(myuid,altreuid);
+
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("messages");
+                    ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            Log.d("BOORRAT","element: " + deletedIndex + " " + deletedItem.getName() + uids.get(deletedIndex));
+                            dataSnapshot.getRef().child(chatuid).removeValue();
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+
+                    });
+                }
+            });
         }
+    }
+
+    public String get_chat_uid(String uid1, String uid2){
+        if(uid1.compareTo(uid2) < 0 ){
+            return uid1+ "|" + uid2;
+        }
+        else return uid2+ "|" + uid1;
     }
 
     @Override
@@ -172,6 +213,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                             ref.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
+                                    Log.d("USSSSSS", "> " + dataSnapshot.toString());
                                     User user =  dataSnapshot.getValue(User.class);
 
 
@@ -222,6 +264,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                     }
 
                 }
+                mSwipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
@@ -229,6 +272,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                 // Getting Post failed, log a message
                 Log.w("Chat", "loadUser1:onCancelled", databaseError.toException());
             }
+
         };
         Ref.addValueEventListener(usuari1Listener);
 
