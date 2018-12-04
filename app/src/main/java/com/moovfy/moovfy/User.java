@@ -85,5 +85,9 @@ public class User {
         ChatsOberts.add(0,chat_uid);
     }
 
+    public void deleteListItem(int index) {
+        ChatsOberts.remove(index);
+    }
+
 }
 

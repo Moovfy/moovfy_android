@@ -145,7 +145,7 @@ public class ChatActivity extends AppCompatActivity {
                 String words = txtMensaje.getText().toString();
                 words = words.replace(System.getProperty("line.separator"), "");
                 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                Message mensaje = new Message(words,usuari2.getName(),uid1,currentTimeMillis());
+                Message mensaje = new Message(words,usuari2.getName(),uid2,currentTimeMillis());
                 DatabaseReference.push().setValue(mensaje);
                 String m = mensaje.getMessage();
                 System.out.println("estoy escribiendo en la base de datos el mensaje " + m);

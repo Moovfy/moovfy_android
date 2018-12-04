@@ -2,6 +2,8 @@ package com.moovfy.moovfy;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -63,6 +65,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.kosalgeek.android.photoutil.ImageLoader;
 import com.google.firebase.database.FirebaseDatabase;
+import com.moovfy.moovfy.map.MapFragment;
 
 import android.content.Context;
 import android.content.Intent;
@@ -246,8 +249,11 @@ public class MainActivity extends AppCompatActivity
                     public void onTabSelected(TabLayout.Tab tab) {
                         viewPager.setCurrentItem(tab.getPosition());
                         if (tab.getPosition() == 1) {
-
+                            Log.w("UUUUUU", "Friends");
+                            sendBroadcast(new Intent("cargarFriends"));
                         } else {
+                            Log.w("UUUUUU", "Near");
+                            sendBroadcast(new Intent("cargarNear"));
 
                         }
                     }
