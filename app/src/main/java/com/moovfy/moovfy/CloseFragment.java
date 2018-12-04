@@ -324,7 +324,7 @@ class ListCloseAdapter extends RecyclerView.Adapter<ListCloseAdapter.ItemCloseVi
         public void bind(final User user, String uid, final OnItemClickListener listener) {
             textViewUsername.setText(user.getName());
             textViewDesc.setText(user.getEmail());
-            GlideApp.with(mContext).load(user.getAvatar()).into(imageView);
+            GlideApp.with(mContext).load(user.getAvatar()).thumbnail(0.1f).into(imageView);
 
 
             itemView.setOnClickListener(new View.OnClickListener() {
