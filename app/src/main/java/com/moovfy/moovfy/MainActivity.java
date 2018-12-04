@@ -2,6 +2,8 @@ package com.moovfy.moovfy;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -63,6 +65,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.kosalgeek.android.photoutil.ImageLoader;
 import com.google.firebase.database.FirebaseDatabase;
+import com.moovfy.moovfy.map.MapFragment;
 
 import android.content.Context;
 import android.content.Intent;
@@ -113,161 +116,160 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        super.onCreate(savedInstanceState);
         Boolean firstRun = getSharedPreferences("PREFERENCE",MODE_PRIVATE).getBoolean("firstRun",true);
-        /*
+
         if(firstRun) {
             Intent intro = new Intent(getApplicationContext(),MoovfyIntro.class);
             startActivity(intro);
         }
-*/
+        else {
 
+            mAuth = FirebaseAuth.getInstance();
 
-        mAuth = FirebaseAuth.getInstance();
+            queue = Volley.newRequestQueue(MainActivity.this);
+            FirebaseUser currentUser = mAuth.getCurrentUser();
+            String firebase_uid = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user_uid", "");
 
-        queue = Volley.newRequestQueue(MainActivity.this);
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        String firebase_uid = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user_uid", "");
+            if (firebase_uid.equals("")) { // || currentUser == null
+                Intent login = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(login);
+            }
+            else {
 
-        if (firebase_uid.equals("")) { // || currentUser == null
-            Intent login = new Intent(getApplicationContext(), LoginActivity.class);
-            startActivity(login);
-        }
+                SmartLocation.with(getApplicationContext()).location().start(locationListener);
+                if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
+                    GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
+                            .addApi(LocationServices.API)
+                            .addConnectionCallbacks(this)
+                            .addOnConnectionFailedListener(this).build();
+                    googleApiClient.connect();
 
+                    LocationRequest locationRequest = LocationRequest.create();
+                    locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                    locationRequest.setInterval(5 * 1000);
+                    locationRequest.setFastestInterval(2 * 1000);
+                    LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                            .addLocationRequest(locationRequest);
 
+                    //**************************
+                    builder.setAlwaysShow(true); //this is the key ingredient
+                    //**************************
 
-
-        SmartLocation.with(getApplicationContext()).location().start(locationListener);
-        if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
-            GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
-                    .addApi(LocationServices.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this).build();
-            googleApiClient.connect();
-
-            LocationRequest locationRequest = LocationRequest.create();
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            locationRequest.setInterval(5 * 1000);
-            locationRequest.setFastestInterval(2 * 1000);
-            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                    .addLocationRequest(locationRequest);
-
-            //**************************
-            builder.setAlwaysShow(true); //this is the key ingredient
-            //**************************
-
-            PendingResult<LocationSettingsResult> result =
-                    LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
-            result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-                @Override
-                public void onResult(@NonNull LocationSettingsResult result) {
-                    final Status status = result.getStatus();
+                    PendingResult<LocationSettingsResult> result =
+                            LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+                    result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+                        @Override
+                        public void onResult(@NonNull LocationSettingsResult result) {
+                            final Status status = result.getStatus();
 //                final LocationSettingsStates state = result.getLocationSettingsStates();
 
-                    switch (status.getStatusCode()) {
-                        case LocationSettingsStatusCodes.SUCCESS:
+                            switch (status.getStatusCode()) {
+                                case LocationSettingsStatusCodes.SUCCESS:
 
 
-                            break;
-                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                            // Location settings are not satisfied. But could be fixed by showing the user
-                            // a dialog.
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            try {
+                                    break;
+                                case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                                    // Location settings are not satisfied. But could be fixed by showing the user
+                                    // a dialog.
+                                    // Show the dialog by calling startResolutionForResult(),
+                                    // and check the result in onActivityResult().
+                                    try {
 
-                                status.startResolutionForResult(MainActivity.this, REQUEST_LOCATION);
-                            } catch (IntentSender.SendIntentException e) {
+                                        status.startResolutionForResult(MainActivity.this, REQUEST_LOCATION);
+                                    } catch (IntentSender.SendIntentException e) {
 
+                                    }
+                                    break;
+                                case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                                    break;
                             }
-                            break;
-                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                            break;
-                    }
+                        }
+                    });
                 }
-            });
-        }
 
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+                setContentView(R.layout.activity_main);
+                Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+                setSupportActionBar(toolbar);
 //coment
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                        this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                drawer.addDrawerListener(toggle);
+                toggle.syncState();
 
-        Bundle bundle = getIntent().getExtras();
-        String path_p = null;
-        if (bundle!= null) path_p = bundle.getString("path_photo");
+                Bundle bundle = getIntent().getExtras();
+                String path_p = null;
+                if (bundle != null) path_p = bundle.getString("path_photo");
 
-        Bitmap bitmap = null;
-        try {
-           if (path_p!= null) bitmap = ImageLoader.init().from(path_p).getBitmap();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-
-        View hview = navigationView.getHeaderView(0);
-        TextView correo = hview.findViewById(R.id.correo);
-        ImageView prof = hview.findViewById(R.id.profile_image);
-        if (bitmap != null) prof.setImageBitmap(bitmap);
-
-        chan = hview.findViewById(R.id.but);
-        chan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent change_i = new Intent(getApplicationContext(),choose_image.class);
-                startActivity(change_i);
-            }
-        });
-
-
-        if (currentUser != null) {
-            String us = currentUser.getEmail();
-            correo.setText(us);
-        }
-        navigationView.setNavigationItemSelectedListener(this);
-
-        //----------------------------- TABS
-        tabLayout = findViewById(R.id.tablayout);
-        tabClose = findViewById(R.id.tabClose);
-        tabFriend = findViewById(R.id.tabFriends);
-        viewPager = findViewById(R.id.viewPager);
-
-        pageAdapter = new PageAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
-        viewPager.setAdapter(pageAdapter);
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-                if (tab.getPosition() == 1) {
-
-                } else {
-
+                Bitmap bitmap = null;
+                try {
+                    if (path_p != null) bitmap = ImageLoader.init().from(path_p).getBitmap();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
                 }
-            }
 
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
 
-            }
+                NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
+                View hview = navigationView.getHeaderView(0);
+                TextView correo = hview.findViewById(R.id.correo);
+                ImageView prof = hview.findViewById(R.id.profile_image);
+                if (bitmap != null) prof.setImageBitmap(bitmap);
 
-            }
-        });
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        //------------------------------------
+                chan = hview.findViewById(R.id.but);
+                chan.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent change_i = new Intent(getApplicationContext(), choose_image.class);
+                        startActivity(change_i);
+                    }
+                });
+
+
+                if (currentUser != null) {
+                    String us = currentUser.getEmail();
+                    correo.setText(us);
+                }
+                navigationView.setNavigationItemSelectedListener(this);
+
+                //----------------------------- TABS
+                tabLayout = findViewById(R.id.tablayout);
+                tabClose = findViewById(R.id.tabClose);
+                tabFriend = findViewById(R.id.tabFriends);
+                viewPager = findViewById(R.id.viewPager);
+
+                pageAdapter = new PageAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
+                viewPager.setAdapter(pageAdapter);
+
+                tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+                    @Override
+                    public void onTabSelected(TabLayout.Tab tab) {
+                        viewPager.setCurrentItem(tab.getPosition());
+                        if (tab.getPosition() == 1) {
+                            Log.w("UUUUUU", "Friends");
+                            sendBroadcast(new Intent("cargarFriends"));
+                        } else {
+                            Log.w("UUUUUU", "Near");
+                            sendBroadcast(new Intent("cargarNear"));
+
+                        }
+                    }
+
+                    @Override
+                    public void onTabUnselected(TabLayout.Tab tab) {
+
+                    }
+
+                    @Override
+                    public void onTabReselected(TabLayout.Tab tab) {
+
+                    }
+                });
+                viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+                //------------------------------------
 
        /* chan = findViewById(R.id.but);
         chan.setOnClickListener(new View.OnClickListener() {
@@ -279,40 +281,42 @@ public class MainActivity extends AppCompatActivity
         });*/
 
 
-
-        FirebaseUser currentUser2 = mAuth.getCurrentUser();
-
-       /* Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child(currentUser2.getUid());//currentUser.getUid()!!!!!!!!!!!!!!!!!!!!!!!!!
-        Log.w("UUUUUU", currentUser2.getUid());
-        ValueEventListener usuari1Listener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // Get Post object and use the values to update the UI
+                mAuth = FirebaseAuth.getInstance();
 
 
+                FirebaseUser currentUser2 = mAuth.getCurrentUser();
 
-                User u = dataSnapshot.getValue(User.class);
-                Log.w("aaaaaaaaaaaaaaaaaaaaa", u.getAvatar());
-                if (u != null) {
-                    if (ivImage == null) {
-                        Log.w("imagenulll", u.getAvatar());
+                Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child(currentUser2.getUid());//currentUser.getUid()!!!!!!!!!!!!!!!!!!!!!!!!!
+                Log.w("UUUUUU", currentUser2.getUid());
+                ValueEventListener usuari1Listener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        // Get Post object and use the values to update the UI
+
+
+                        User u = dataSnapshot.getValue(User.class);
+                        Log.w("aaaaaaaaaaaaaaaaaaaaa", u.getAvatar());
+                        if (u != null) {
+                            if (ivImage == null) {
+                                Log.w("imagenulll", u.getAvatar());
+                            }
+                            ivImage = (ImageView) findViewById(R.id.profile_image);
+
+                            GlideApp.with(getApplicationContext()).load(u.getAvatar()).into(ivImage);
+
+                        }
                     }
-                    ivImage = (ImageView) findViewById(R.id.profile_image);
 
-                    GlideApp.with(getApplicationContext()).load(u.getAvatar()).into(ivImage);
-
-                }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        // Getting Post failed, log a message
+                        Log.w("Chat", "loadUser1:onCancelled", databaseError.toException());
+                    }
+                };
+                Ref_uid1.addValueEventListener(usuari1Listener);
             }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Getting Post failed, log a message
-                Log.w("Chat", "loadUser1:onCancelled", databaseError.toException());
-            }
-        };
-        Ref_uid1.addValueEventListener(usuari1Listener);*/
-
-
+        }
 
     }
 

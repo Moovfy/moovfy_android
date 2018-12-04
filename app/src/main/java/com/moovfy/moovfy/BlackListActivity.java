@@ -45,37 +45,6 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerBlackList);
 
 
-        userList = new ArrayList<>();
-        userList.add(new Usuario(
-                "Usuario1",
-                "Ultim missatge user 1",
-                R.drawable.icono
-        ));
-        userList.add(new Usuario(
-                "Usuario2",
-                "Ultim missatge user 2",
-                R.drawable.icono
-        ));
-        userList.add(new Usuario(
-                "Usuario3",
-                "Ultim missatge user 3",
-                R.drawable.icono
-        ));
-        userList.add(new Usuario(
-                "Usuario4",
-                "Descripcion del user4",
-                R.drawable.icono
-        ));
-        userList.add(new Usuario(
-                "Usuario5",
-                "Descripcion del user5",
-                R.drawable.icono
-        ));
-        userList.add(new Usuario(
-                "Usuario6",
-                "Descripcion del usersfsddddddddddddddddddddddddddddddf6",
-                R.drawable.icono
-        ));
 
         adapter = new BlackListAdapter(this, userList, new BlackListAdapter.OnItemClickListener() {
             @Override
@@ -112,6 +81,20 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
             });
             snackbar.setActionTextColor(Color.YELLOW);
             snackbar.show();
+
+            snackbar.addCallback(new Snackbar.Callback(){
+                @Override
+                public void onShown(Snackbar sb) {
+                    super.onShown(sb);
+                }
+
+                @Override
+                public void onDismissed(Snackbar transientBottomBar, int event) {
+                    super.onDismissed(transientBottomBar, event);
+
+                    Log.d("Borrrat: ", "> " + "borrat");
+                }
+            });
         }
     }
 }

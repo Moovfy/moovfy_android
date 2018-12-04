@@ -35,6 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.moovfy.moovfy.map.MapFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -106,6 +107,8 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 updateList();
             }
         });
+
+
     }
 
     @Override
@@ -209,6 +212,14 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                                         user.getName()
                                                 ));
                                                 uids.add(uid);
+
+                                                //--------------------------------------------
+                                                Intent ii = new Intent("action_location_updated");
+                                                ii.putExtra("name", user.getName());
+                                                ii.putExtra("avatar", user.getAvatar());
+                                               // ii.putExtra("loc", )
+                                                getActivity().sendBroadcast(ii);
+                                                //-------------------------------------
                                             }
                                             adapter.notifyDataSetChanged();
 
@@ -324,7 +335,7 @@ class ListCloseAdapter extends RecyclerView.Adapter<ListCloseAdapter.ItemCloseVi
         public void bind(final User user, String uid, final OnItemClickListener listener) {
             textViewUsername.setText(user.getName());
             textViewDesc.setText(user.getEmail());
-            GlideApp.with(mContext).load(user.getAvatar()).into(imageView);
+            GlideApp.with(mContext).load(user.getAvatar()).thumbnail(0.1f).into(imageView);
 
 
             itemView.setOnClickListener(new View.OnClickListener() {
