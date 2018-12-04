@@ -116,7 +116,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
 
             // showing snack bar with Undo option
             Snackbar snackbar = Snackbar
-                    .make(relativeLayout, name + " removed from black list!", Snackbar.LENGTH_LONG);
+                    .make(relativeLayout, name + " removed from Chats!", Snackbar.LENGTH_LONG);
             snackbar.setAction("UNDO", new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -147,8 +147,51 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                     ref.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            Log.d("BOORRAT","element: " + deletedIndex + " " + deletedItem.getName() + uids.get(deletedIndex));
+                            //Log.d("BOORRAT","element: " + deletedIndex + " " + deletedItem.getName() + uids.get(deletedIndex));
                             dataSnapshot.getRef().child(chatuid).removeValue();
+
+
+                            DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference("users").child(myuid);
+                            ref2.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    User user =  dataSnapshot.getValue(User.class);
+                                    int index = user.getChatsOberts().indexOf(chatuid);
+                                    if (index != -1) {
+                                        user.deleteListItem(index);
+                                    }
+                                    ref2.setValue(user);
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+
+                            });
+
+                            DatabaseReference ref3 = FirebaseDatabase.getInstance().getReference("users").child(altreuid);
+                            ref3.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    User user =  dataSnapshot.getValue(User.class);
+                                    int index = user.getChatsOberts().indexOf(chatuid);
+                                    if (index != -1) {
+                                        user.deleteListItem(index);
+                                    }
+                                    ref3.setValue(user);
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+
+                            });
+                            userList.clear();
+                            uids.clear();
 
                         }
 
@@ -158,6 +201,8 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                         }
 
                     });
+
+
                 }
             });
         }
@@ -409,6 +454,7 @@ class ListChatsAdapter extends RecyclerView.Adapter<ListChatsAdapter.ItemChatVie
         // to perform recycler view delete animations
         // NOTE: don't call notifyDataSetChanged()
         notifyItemRemoved(position);
+        notifyItemRangeChanged(position, getItemCount() - position);
     }
 
     public void restoreItem(User item, int position) {
