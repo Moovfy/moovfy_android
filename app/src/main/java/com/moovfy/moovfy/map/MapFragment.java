@@ -276,6 +276,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         //LatLng position = new LatLng(41.7164, 1.8223);
 
                         String avatar = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62"; // set the default avatar
+                        if (myuser.getString("avatar") != null) {
+                            avatar = myuser.getString("avatar");
+                        }
                         URL imageurl = new URL(avatar);
                         Bitmap bmp = BitmapFactory.decodeStream(imageurl.openConnection().getInputStream());
 
@@ -329,9 +332,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                         LatLng newposition = new LatLng(lat, lng);
                                         //LatLng position = new LatLng(41.7164, 1.8223);
 
+                                        Log.d("avatarde", newuser.getString("username"));
                                         String avatar = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62"; // set the default avatar
+                                        if (newuser.getString("avatar") != null) {
+                                            avatar = newuser.getString("avatar");
+                                        }
+
                                         URL imageurl = new URL(avatar);
                                         Bitmap bmp = BitmapFactory.decodeStream(imageurl.openConnection().getInputStream());
+
 
                                         ClusterMarker newClusterMarker = new ClusterMarker(
                                                 newposition,
