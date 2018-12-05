@@ -214,11 +214,13 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                                 uids.add(uid);
 
                                                 //--------------------------------------------
+                                                /*
                                                 Intent ii = new Intent("action_location_updated");
                                                 ii.putExtra("name", user.getName());
                                                 ii.putExtra("avatar", user.getAvatar());
                                                // ii.putExtra("loc", )
                                                 getActivity().sendBroadcast(ii);
+                                                */
                                                 //-------------------------------------
                                             }
                                             adapter.notifyDataSetChanged();

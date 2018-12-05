@@ -79,8 +79,12 @@ dependencies {
 
     annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
 
+
     //Image GIF
     implementation 'com.github.Cutta:GifView:1.1'
+
+
+    implementation 'com.squareup.picasso:picasso:2.71828'
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: "androidx.navigation.safeargs"

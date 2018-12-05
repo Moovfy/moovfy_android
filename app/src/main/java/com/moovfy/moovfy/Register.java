@@ -154,7 +154,7 @@ public class Register extends AppCompatActivity {
                                 e.printStackTrace();
                             }
 
-                            pasar_datos(json);
+                            pasar_datos(json, user.getUid());
 
                             user.sendEmailVerification();
 
@@ -173,7 +173,7 @@ public class Register extends AppCompatActivity {
 
     }
 
-    private void pasar_datos(JSONObject json) {
+    private void pasar_datos(JSONObject json, String uid) {
         String url = "http://10.4.41.143:3000/users/register";
 
         JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
@@ -193,6 +193,32 @@ public class Register extends AppCompatActivity {
 
         };
         queue.add(jsonobj);
+
+        queue = Volley.newRequestQueue(getApplicationContext());
+        String url2 = "http://10.4.41.143:3000/users/updateavatar/" + uid;
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("avatar", "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest jsonobj2 = new JsonObjectRequest(Request.Method.PUT, url2, obj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("Response", response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Error.Response", error.toString());
+                    }
+                }
+        );
+        queue.add(jsonobj2);
+
+
 
     }
 
