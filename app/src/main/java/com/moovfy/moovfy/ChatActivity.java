@@ -18,7 +18,14 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,6 +40,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import static java.lang.System.currentTimeMillis;
@@ -49,6 +58,7 @@ public class ChatActivity extends AppCompatActivity {
     private String Chat_UID;
 
     private ImageButton btnEnviar;
+    private ImageButton btnFriend;
     private Button btnEnviarFoto;
     private EditText txtMensaje;
     private User usuari;
@@ -61,6 +71,8 @@ public class ChatActivity extends AppCompatActivity {
     String uid1;
     String uid2;
     private TextView nomuser;
+    private RequestQueue queue;
+    private boolean first;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,11 +80,12 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
 
-
         database = FirebaseDatabase.getInstance();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         uid1 = currentUser.getUid();
+        queue = Volley.newRequestQueue(this);
+        first = true;
         //uid1 = "2";
 
         Intent intent = getIntent();
@@ -98,6 +111,7 @@ public class ChatActivity extends AppCompatActivity {
         nomuser = (TextView) findViewById(R.id.action_bar_title_1);
         btnEnviar = (ImageButton) findViewById(R.id.button_chatbox_send);
         btnEnviarFoto = (Button) findViewById(R.id.btnEnviarFoto);
+        btnFriend = (ImageButton) findViewById(R.id.addfriends);
         txtMensaje  = (EditText) findViewById(R.id.edittext_chatbox);
         fotousuari = (ImageView) findViewById(R.id.conversation_contact_photo);
         mMessageRecycler = (RecyclerView) findViewById(R.id.reyclerview_message_list);
@@ -166,13 +180,28 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        mMessageAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+        btnFriend.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                super.onItemRangeInserted(positionStart, itemCount);
-                setScrollbar();
+            public void onClick(View v) {
+                if(first) {
+                    Toast.makeText(getApplicationContext(), "Added to friends", Toast.LENGTH_LONG).show();
+                    AddFriends(uid1, uid2);
+                    first = false;
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "You are his friend already", Toast.LENGTH_LONG).show();
+                }
             }
         });
+
+
+                mMessageAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                    @Override
+                    public void onItemRangeInserted(int positionStart, int itemCount) {
+                        super.onItemRangeInserted(positionStart, itemCount);
+                        setScrollbar();
+                    }
+                });
 
         DatabaseReference.addChildEventListener(new ChildEventListener() {
             @Override
@@ -243,6 +272,49 @@ public class ChatActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void AddFriends(String uid1,String uid2) {
+
+        String url = "https://10.4.41.143:3001/relations/add";
+
+
+        JSONObject json = new JSONObject();
+
+        try {
+            json.put("firebase_uid1", uid1);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            json.put("firebase_uid2", uid2);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            json.put("status", "ok");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }
+        ){
+
+        };
+        queue.add(jsonobj);
+
     }
 
 
