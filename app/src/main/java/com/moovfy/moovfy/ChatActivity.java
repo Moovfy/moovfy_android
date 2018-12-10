@@ -127,7 +127,7 @@ public class ChatActivity extends AppCompatActivity {
                 usuari2 = dataSnapshot.getValue(User.class);
                 Log.w("Chat22", usuari2.toString());
                 nomuser.setText(usuari2.getName());
-                Glide.with(ChatActivity.this).load(usuari2.getAvatar()).into(fotousuari);
+                Glide.with(getApplicationContext()).load(usuari2.getAvatar()).into(fotousuari);
             }
 
             @Override

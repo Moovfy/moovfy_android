@@ -60,6 +60,8 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
     User chatsOberts;
     List<String> listChatsOberts;
 
+    private boolean clicked = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,15 +116,17 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
             // remove the item from recycler view
             adapter.removeItem(viewHolder.getAdapterPosition());
 
+
             // showing snack bar with Undo option
             Snackbar snackbar = Snackbar
-                    .make(relativeLayout, name + " removed from black list!", Snackbar.LENGTH_LONG);
+                    .make(relativeLayout, name + " removed from Chats!", Snackbar.LENGTH_LONG);
             snackbar.setAction("UNDO", new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    clicked = true;
                     // undo is selected, restore the deleted item
                     adapter.restoreItem(deletedItem, deletedIndex);
+
                 }
             });
             snackbar.setActionTextColor(Color.YELLOW);
@@ -137,32 +141,81 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                 public void onDismissed(Snackbar transientBottomBar, int event) {
                     super.onDismissed(transientBottomBar, event);
 
-                    FirebaseAuth mAuth = FirebaseAuth.getInstance();
-                    FirebaseUser currentUser = mAuth.getCurrentUser();
-                    String myuid =  currentUser.getUid();
-                    String altreuid = uids.get(deletedIndex);
-                    String chatuid = get_chat_uid(myuid,altreuid);
+                    if (!clicked) {
+                        borrarDB(deletedIndex, deletedItem);
+                    }
 
-                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("messages");
-                    ref.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            Log.d("BOORRAT","element: " + deletedIndex + " " + deletedItem.getName() + uids.get(deletedIndex));
-                            dataSnapshot.getRef().child(chatuid).removeValue();
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-
-                    });
                 }
             });
         }
     }
 
+    public void borrarDB(int deletedIndex, User deletedItem) {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        String myuid =  currentUser.getUid();
+        String altreuid = uids.get(deletedIndex);
+        String chatuid = get_chat_uid(myuid,altreuid);
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("messages");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Log.d("BOORRAT","element: " + deletedIndex + " " + deletedItem.getName() + uids.get(deletedIndex));
+                dataSnapshot.getRef().child(chatuid).removeValue();
+
+
+                DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference("users").child(myuid);
+                ref2.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        User user =  dataSnapshot.getValue(User.class);
+                        int index = user.getChatsOberts().indexOf(chatuid);
+                        if (index != -1) {
+                            user.deleteListItem(index);
+                        }
+                        ref2.setValue(user);
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+
+                });
+
+                DatabaseReference ref3 = FirebaseDatabase.getInstance().getReference("users").child(altreuid);
+                ref3.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        User user =  dataSnapshot.getValue(User.class);
+                        int index = user.getChatsOberts().indexOf(chatuid);
+                        if (index != -1) {
+                            user.deleteListItem(index);
+                        }
+                        ref3.setValue(user);
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+
+                });
+                userList.clear();
+                uids.clear();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+
+        });
+    }
     public String get_chat_uid(String uid1, String uid2){
         if(uid1.compareTo(uid2) < 0 ){
             return uid1+ "|" + uid2;
@@ -275,6 +328,19 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
 
         };
         Ref.addValueEventListener(usuari1Listener);
+
+    }
+
+    private class restaurarDB {
+        List<Message> msgs;
+        User u1;
+        User u2;
+
+        public restaurarDB(List<Message> msgs, User u1, User u2) {
+            this.msgs = msgs;
+            this.u1 = u1;
+            this.u2 = u2;
+        }
 
     }
 
@@ -409,6 +475,7 @@ class ListChatsAdapter extends RecyclerView.Adapter<ListChatsAdapter.ItemChatVie
         // to perform recycler view delete animations
         // NOTE: don't call notifyDataSetChanged()
         notifyItemRemoved(position);
+        notifyItemRangeChanged(position, getItemCount() - position);
     }
 
     public void restoreItem(User item, int position) {
