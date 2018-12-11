@@ -48,7 +48,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlackListActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
+public class BlackListActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener , SwipeRefreshLayout.OnRefreshListener{
 
     private RecyclerView recyclerBlackList;
     private BlackListAdapter adapter;
@@ -72,6 +72,8 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerBlackList = (RecyclerView) findViewById(R.id.recycleBlackList);
         recyclerBlackList.setLayoutManager(linearLayoutManager);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
 
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerBlackList);
@@ -85,6 +87,14 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
             }
         });
         recyclerBlackList.setAdapter(adapter);
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+                updateList();
+
+            }
+        });
     }
 
     private void updateList() {
@@ -102,6 +112,12 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
         t.execute(url);
 
 
+    }
+
+    @Override
+    public void onRefresh() {
+        updateList();
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     private class JsonTask extends AsyncTask<String, String, String> {
@@ -152,6 +168,7 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
                                         uids.add(uid);
                                         adapter.notifyDataSetChanged();
 
+                                        mSwipeRefreshLayout.setRefreshing(false);
                                     }
 
                                     @Override
@@ -252,12 +269,12 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
                         String myuid =  currentUser.getUid();
                         JSONObject  obj = new JSONObject();
                         try {
-                            obj.put("firebase_uid1",uids.get(deletedIndex));
-                            obj.put("firebase_uid2",myuid);
+                            obj.put("firebase_uid1",myuid);
+                            obj.put("firebase_uid2",uids.get(deletedIndex));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-
+                        Log.d("Unblocking:" , obj.toString());
                         String url = "http://10.4.41.143:3000/relations/unblock";
 
                         JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url, obj,
@@ -351,12 +368,12 @@ class BlackListAdapter extends RecyclerView.Adapter<BlackListAdapter.ItemBlackLi
 
             viewBackground = itemView.findViewById(R.id.view_background);
             viewForeground = itemView.findViewById(R.id.view_foreground);
-            this.mContext = mContext;
+            this.mContext = context;
         }
 
         public void bind(final User user, final OnItemClickListener listener) {
-            textViewUsername.setText(user.getUsername());
-            textViewDesc.setText(user.getDesc());
+            textViewUsername.setText(user.getName());
+            textViewDesc.setText(user.getEmail());
             GlideApp.with(mContext).load(user.getAvatar()).into(imageView);
             itemView.setOnClickListener(new View.OnClickListener() {
 

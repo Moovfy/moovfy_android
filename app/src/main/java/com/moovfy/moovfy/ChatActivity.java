@@ -12,6 +12,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -90,7 +92,12 @@ public class ChatActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         uid2 = intent.getStringExtra(CloseFragment.EXTRA_MESSAGE);
-
+        if (uid2.equals("")) {
+            uid2 = intent.getStringExtra(FriendFragment.EXTRA_MESSAGE);
+        }
+        if (uid2.equals("")){
+            uid2 = intent.getStringExtra(ChatsActivity.EXTRA_MESSAGE);
+        }
 
         Chat_UID = get_chat_uid(uid1, uid2);
 
@@ -236,6 +243,34 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //afegir a Friends
+        if (id == R.id.action_add) {
+            Toast.makeText(getApplicationContext(), "Added to Friends", Toast.LENGTH_LONG).show();
+            AddFriends(uid1,uid2);
+            return true;
+        }
+        //afegir a bloquejat
+        else if (id == R.id.action_block){
+            Toast.makeText(getApplicationContext(), "Added to Black List", Toast.LENGTH_LONG).show();
+            AddFBlackList(uid1,uid2);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     private void setScrollbar(){
         mMessageRecycler.scrollToPosition(mMessageAdapter.getItemCount()-1);
     }
@@ -278,7 +313,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void AddFriends(String uid1,String uid2) {
 
-        String url = "https://10.4.41.143:3001/relations/add";
+        String url = "http://10.4.41.143:3000/relations/add";
 
 
         JSONObject json = new JSONObject();
@@ -295,6 +330,43 @@ public class ChatActivity extends AppCompatActivity {
         }
         try {
             json.put("status", "ok");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }
+        ){
+
+        };
+        queue.add(jsonobj);
+
+    }
+
+    private void AddFBlackList(String uid1, String uid2) {
+        String url = "http://10.4.41.143:3000/relations/block";
+
+
+        JSONObject json = new JSONObject();
+
+        try {
+            json.put("firebase_uid1", uid1);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            json.put("firebase_uid2", uid2);
         } catch (JSONException e) {
             e.printStackTrace();
         }
