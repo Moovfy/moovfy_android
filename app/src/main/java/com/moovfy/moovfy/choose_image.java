@@ -18,6 +18,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,6 +37,10 @@ import com.kosalgeek.android.photoutil.GalleryPhoto;
 import com.kosalgeek.android.photoutil.ImageLoader;
 
 import java.io.ByteArrayOutputStream;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -47,6 +57,7 @@ public class choose_image extends AppCompatActivity {
     CameraPhoto cameraPhoto;
     GalleryPhoto galleryPhoto;
 
+    private RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,6 +169,31 @@ public class choose_image extends AppCompatActivity {
                             //uid = "2"; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                             DatabaseReference Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child(uid).child("avatar");
                             Ref_uid1.setValue(uri.toString());
+                            //acces api per guardar el avatar
+                            queue = Volley.newRequestQueue(getApplicationContext());
+                            String url2 = "http://10.4.41.143:3000/users/updateavatar/" + uid;
+                            JSONObject obj = new JSONObject();
+                            try {
+                                obj.put("avatar", uri.toString());
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            JsonObjectRequest jsonobj2 = new JsonObjectRequest(Request.Method.PUT, url2, obj,
+                                    new Response.Listener<JSONObject>() {
+                                        @Override
+                                        public void onResponse(JSONObject response) {
+                                            Log.d("Response", response.toString());
+                                        }
+                                    },
+                                    new Response.ErrorListener() {
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
+                                            Log.d("Error.Response", error.toString());
+                                        }
+                                    }
+                            );
+                            queue.add(jsonobj2);
+
                         }
                     });
                 }

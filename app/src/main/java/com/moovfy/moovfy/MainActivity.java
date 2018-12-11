@@ -2,6 +2,8 @@ package com.moovfy.moovfy;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -63,6 +65,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.kosalgeek.android.photoutil.ImageLoader;
 import com.google.firebase.database.FirebaseDatabase;
+import com.moovfy.moovfy.map.MapFragment;
 
 import android.content.Context;
 import android.content.Intent;
@@ -114,6 +117,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         Boolean firstRun = getSharedPreferences("PREFERENCE",MODE_PRIVATE).getBoolean("firstRun",true);
 
         if(firstRun) {
@@ -133,6 +138,33 @@ public class MainActivity extends AppCompatActivity
                 startActivity(login);
             }
             else {
+/*
+                //------------------------------------------------
+                //queue = Volley.newRequestQueue(getApplicationContext());
+                String url = "http://10.4.41.143:3000/users/updateavatar/4";
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("avatar", "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url, obj,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Log.d("Response", response.toString());
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.d("Error.Response", error.toString());
+                            }
+                        }
+                );
+                queue.add(jsonobj);
+                //------------------------------------------
+*/
 
                 SmartLocation.with(getApplicationContext()).location().start(locationListener);
                 if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
@@ -246,8 +278,11 @@ public class MainActivity extends AppCompatActivity
                     public void onTabSelected(TabLayout.Tab tab) {
                         viewPager.setCurrentItem(tab.getPosition());
                         if (tab.getPosition() == 1) {
-
+                            Log.w("UUUUUU", "Friends");
+                            sendBroadcast(new Intent("cargarFriends"));
                         } else {
+                            Log.w("UUUUUU", "Near");
+                            sendBroadcast(new Intent("cargarNear"));
 
                         }
                     }
@@ -298,6 +333,9 @@ public class MainActivity extends AppCompatActivity
 
                             GlideApp.with(getApplicationContext()).load(u.getAvatar()).into(ivImage);
 
+                            TextView name = findViewById((R.id.username));
+                            name.setText(u.getName());
+
                         }
                     }
 
@@ -332,6 +370,8 @@ public class MainActivity extends AppCompatActivity
                 }
         );
         queue.add(jsonobj);
+
+
 
     }
 

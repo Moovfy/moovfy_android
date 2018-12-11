@@ -141,7 +141,7 @@ public class ChatActivity extends AppCompatActivity {
                 usuari2 = dataSnapshot.getValue(User.class);
                 Log.w("Chat22", usuari2.toString());
                 nomuser.setText(usuari2.getName());
-                Glide.with(ChatActivity.this).load(usuari2.getAvatar()).into(fotousuari);
+                Glide.with(getApplicationContext()).load(usuari2.getAvatar()).into(fotousuari);
             }
 
             @Override
@@ -158,7 +158,9 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String words = txtMensaje.getText().toString();
                 words = words.replace(System.getProperty("line.separator"), "");
+
                 Message mensaje = new Message(words,usuari1.getName(),uid1,currentTimeMillis());
+
                 DatabaseReference.push().setValue(mensaje);
                 String m = mensaje.getMessage();
                 Log.d("Chat", "estoy escribiendo en la base de datos el mensaje " + m);
