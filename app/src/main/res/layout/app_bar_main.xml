@@ -23,7 +23,8 @@
             android:id="@+id/fragment"
             android:name="com.moovfy.moovfy.map.MapFragment"
             android:layout_width="match_parent"
-            android:layout_height="260dp" />
+            android:layout_height="260dp"
+            />
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tablayout"

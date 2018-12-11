@@ -138,10 +138,10 @@ public class MainActivity extends AppCompatActivity
                 startActivity(login);
             }
             else {
-/*
+
                 //------------------------------------------------
                 //queue = Volley.newRequestQueue(getApplicationContext());
-                String url = "http://10.4.41.143:3000/users/updateavatar/4";
+                String url = "http://10.4.41.143:3000/users/updateavatar/feaWY5bkcEYpa5ZEpsLB1whWfF83";
                 JSONObject obj = new JSONObject();
                 try {
                     obj.put("avatar", "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62");
@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity
                 );
                 queue.add(jsonobj);
                 //------------------------------------------
-*/
+
 
                 SmartLocation.with(getApplicationContext()).location().start(locationListener);
                 if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
@@ -399,12 +399,12 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
+/*
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
+*/
         return super.onOptionsItemSelected(item);
     }
 

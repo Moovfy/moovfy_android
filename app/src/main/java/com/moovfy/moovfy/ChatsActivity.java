@@ -162,7 +162,8 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Log.d("BOORRAT","element: " + deletedIndex + " " + deletedItem.getName() + uids.get(deletedIndex));
-                dataSnapshot.getRef().child(chatuid).removeValue();
+                //Borra els missatges
+                //dataSnapshot.getRef().child(chatuid).removeValue();
 
 
                 DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference("users").child(myuid);
@@ -184,7 +185,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                     }
 
                 });
-
+/*
                 DatabaseReference ref3 = FirebaseDatabase.getInstance().getReference("users").child(altreuid);
                 ref3.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -204,6 +205,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                     }
 
                 });
+                */
                 userList.clear();
                 uids.clear();
 
