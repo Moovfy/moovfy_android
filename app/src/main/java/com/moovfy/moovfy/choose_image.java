@@ -1,8 +1,10 @@
 package com.moovfy.moovfy;
 
 import android.arch.persistence.room.Database;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
@@ -34,12 +36,15 @@ import com.kosalgeek.android.photoutil.CameraPhoto;
 import com.kosalgeek.android.photoutil.GalleryPhoto;
 import com.kosalgeek.android.photoutil.ImageLoader;
 
+import java.io.ByteArrayOutputStream;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class choose_image extends AppCompatActivity {
     Button galeria;
@@ -122,9 +127,36 @@ public class choose_image extends AppCompatActivity {
     }
     protected void putImageInStorage(Intent data) {
         if (data != null) {
-            final Uri uri = data.getData();
+            Uri uri;
+
+            final Uri selectedImage = data.getData();
+
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(
+                        selectedImage);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            Bitmap bmp = BitmapFactory.decodeStream(imageStream);
+
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.PNG, 20, stream);
+            byte[] byteArray = stream.toByteArray();
+            try {
+                stream.close();
+                stream = null;
+            } catch (IOException e) {
+
+                e.printStackTrace();
+            }
+
+            uri = getImageUri(this,bmp);
+
             Log.d("Chat", "Uri: " + uri.toString());
             StorageReference storageReference = FirebaseStorage.getInstance().getReference("Perfil").child(uri.getLastPathSegment());
+
             storageReference.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -167,6 +199,13 @@ public class choose_image extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private Uri getImageUri(Context context, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
     }
 
 
