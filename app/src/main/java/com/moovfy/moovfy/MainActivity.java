@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -75,10 +76,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import io.nlopez.smartlocation.OnActivityUpdatedListener;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
@@ -138,7 +147,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(login);
             }
             else {
-
+/*
                 //------------------------------------------------
                 //queue = Volley.newRequestQueue(getApplicationContext());
                 String url = "http://10.4.41.143:3000/users/updateavatar/feaWY5bkcEYpa5ZEpsLB1whWfF83";
@@ -164,7 +173,7 @@ public class MainActivity extends AppCompatActivity
                 );
                 queue.add(jsonobj);
                 //------------------------------------------
-
+*/
 
                 SmartLocation.with(getApplicationContext()).location().start(locationListener);
                 if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
@@ -309,12 +318,9 @@ public class MainActivity extends AppCompatActivity
             }
         });*/
 
-
+/*
                 mAuth = FirebaseAuth.getInstance();
-
-
                 FirebaseUser currentUser2 = mAuth.getCurrentUser();
-
                 Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child(currentUser2.getUid());//currentUser.getUid()!!!!!!!!!!!!!!!!!!!!!!!!!
                 Log.w("UUUUUU", currentUser2.getUid());
                 ValueEventListener usuari1Listener = new ValueEventListener() {
@@ -345,10 +351,84 @@ public class MainActivity extends AppCompatActivity
                         Log.w("Chat", "loadUser1:onCancelled", databaseError.toException());
                     }
                 };
+
                 Ref_uid1.addValueEventListener(usuari1Listener);
+                */
+
+
+                String url = "http://10.4.41.143:3000/users/" + currentUser.getUid();
+                JsonTask t = new JsonTask();
+                t.execute(url);
             }
 
         }
+
+    }
+
+    private class JsonTask extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            HttpURLConnection connection = null;
+            BufferedReader reader = null;
+
+            try {
+                URL url = new URL(params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+
+                connection.connect();
+
+                InputStream stream = connection.getInputStream();
+
+                reader = new BufferedReader(new InputStreamReader(stream));
+
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line+"\n");
+                    Log.d("APIResponse: ", "> " + line);
+                }
+
+                return buffer.toString();
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+
+            ivImage = (ImageView) findViewById(R.id.profile_image);
+            try {
+                JSONObject obj = new JSONObject(s);
+
+                GlideApp.with(getApplicationContext()).load(obj.getString("avatar")).into(ivImage);
+
+                TextView name = findViewById((R.id.username));
+                name.setText(obj.getString("complete_name"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
 
     }
 

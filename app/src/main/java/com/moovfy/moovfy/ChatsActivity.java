@@ -47,7 +47,8 @@ import static com.moovfy.moovfy.MessageListAdapter.formatDateTime;
 
 public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouchHelperChats.RecyclerItemTouchHelperChatsListener, SwipeRefreshLayout.OnRefreshListener {
 
-    public static final String EXTRA_MESSAGE = "";
+    public static final String EXTRA_MESSAGE = "uid";
+    public static final String RELATION = "relation";
     private RecyclerView recyclerListChats;
     private ListChatsAdapter adapter;
     List<User> userList = new ArrayList<>();
@@ -86,6 +87,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
             public void onItemClick(String uid) {
                 Log.d("UIDagafat: ", "> " + uid);
                 Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+                intent.putExtra(RELATION, "donotshow");
                 intent.putExtra(EXTRA_MESSAGE, uid);
                 startActivity(intent);
             }
