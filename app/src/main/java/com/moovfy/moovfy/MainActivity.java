@@ -147,17 +147,17 @@ public class MainActivity extends AppCompatActivity
                 startActivity(login);
             }
             else {
-/*
+
                 //------------------------------------------------
                 //queue = Volley.newRequestQueue(getApplicationContext());
-                String url = "http://10.4.41.143:3000/users/updateavatar/feaWY5bkcEYpa5ZEpsLB1whWfF83";
+                String url3 = "http://10.4.41.143:3000/users/updateavatar/8qZ0q11nqSZPjbBooJn02kdsF7Y2";
                 JSONObject obj = new JSONObject();
                 try {
                     obj.put("avatar", "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url, obj,
+                JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url3, obj,
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity
                 );
                 queue.add(jsonobj);
                 //------------------------------------------
-*/
+
 
                 SmartLocation.with(getApplicationContext()).location().start(locationListener);
                 if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {

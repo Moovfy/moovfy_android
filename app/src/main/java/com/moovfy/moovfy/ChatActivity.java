@@ -383,7 +383,7 @@ public class ChatActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.DELETE, url,json,
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {

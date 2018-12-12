@@ -206,7 +206,7 @@ public class Register extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d("Response", response.toString());
+                        Log.d("Response update iamge:", response.toString());
                     }
                 },
                 new Response.ErrorListener() {
