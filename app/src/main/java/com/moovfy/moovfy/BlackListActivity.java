@@ -277,7 +277,7 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
                         Log.d("Unblocking:" , obj.toString());
                         String url = "http://10.4.41.143:3000/relations/unblock";
 
-                        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url, obj,
+                        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url, obj,
                                 new Response.Listener<JSONObject>() {
                                     @Override
                                     public void onResponse(JSONObject response) {

@@ -76,6 +76,10 @@ public class ChatActivity extends AppCompatActivity {
     private RequestQueue queue;
     private boolean first;
 
+    Menu optionsMenu;
+
+    String relation = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,13 +95,8 @@ public class ChatActivity extends AppCompatActivity {
         //uid1 = "2";
 
         Intent intent = getIntent();
-        uid2 = intent.getStringExtra(CloseFragment.EXTRA_MESSAGE);
-        if (uid2.equals("")) {
-            uid2 = intent.getStringExtra(FriendFragment.EXTRA_MESSAGE);
-        }
-        if (uid2.equals("")){
-            uid2 = intent.getStringExtra(ChatsActivity.EXTRA_MESSAGE);
-        }
+        uid2 = intent.getStringExtra("uid");
+        relation = intent.getStringExtra("relation");
 
         Chat_UID = get_chat_uid(uid1, uid2);
 
@@ -118,7 +117,7 @@ public class ChatActivity extends AppCompatActivity {
         nomuser = (TextView) findViewById(R.id.action_bar_title_1);
         btnEnviar = (ImageButton) findViewById(R.id.button_chatbox_send);
         btnEnviarFoto = (Button) findViewById(R.id.btnEnviarFoto);
-        btnFriend = (ImageButton) findViewById(R.id.addfriends);
+        //btnFriend = (ImageButton) findViewById(R.id.addfriends);
         txtMensaje  = (EditText) findViewById(R.id.edittext_chatbox);
         fotousuari = (ImageView) findViewById(R.id.conversation_contact_photo);
         mMessageRecycler = (RecyclerView) findViewById(R.id.reyclerview_message_list);
@@ -188,7 +187,7 @@ public class ChatActivity extends AppCompatActivity {
                 startActivityForResult(intent, UPLOAD_IMAGE);
             }
         });
-
+/*
         btnFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -202,7 +201,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
-
+*/
 
                 mMessageAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                     @Override
@@ -246,6 +245,12 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        optionsMenu = menu;
+        if (relation.equals("ok")) {
+            optionsMenu.getItem(0).setTitle("Delete Friend");
+        } else if (relation.equals("donotshow")) {
+            optionsMenu.removeItem(R.id.action_add);
+        }
         return true;
     }
 
@@ -257,13 +262,19 @@ public class ChatActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //afegir a Friends
-        if (id == R.id.action_add) {
+
+        if (id == R.id.action_add && relation.equals("no")) { //afegir amic
             Toast.makeText(getApplicationContext(), "Added to Friends", Toast.LENGTH_LONG).show();
             AddFriends(uid1,uid2);
             return true;
         }
-        //afegir a bloquejat
-        else if (id == R.id.action_block){
+        else if (id == R.id.action_add && relation.equals("ok")) { //borrar amic
+            Toast.makeText(getApplicationContext(), "Friend Removed", Toast.LENGTH_LONG).show();
+            RemoveFriends(uid1,uid2);
+            return true;
+        }
+
+        else if (id == R.id.action_block){ //afegir a bloquejats
             Toast.makeText(getApplicationContext(), "Added to Black List", Toast.LENGTH_LONG).show();
             AddFBlackList(uid1,uid2);
         }
@@ -338,7 +349,45 @@ public class ChatActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        Log.d("Response add:", response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
 
+                    }
+                }
+        ){
+
+        };
+        queue.add(jsonobj);
+
+    }
+//!!!!!!!!!!!!!!!!!!!!!!!!
+    private void RemoveFriends(String uid1,String uid2) {
+
+        String url = "http://10.4.41.143:3000/relations";
+        Log.d("inside remove:", url);
+
+        JSONObject json = new JSONObject();
+
+        try {
+            json.put("firebase_uid1", uid1);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            json.put("firebase_uid2", uid2);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("Response delete:", response.toString());
                     }
                 },
                 new Response.ErrorListener() {
@@ -375,7 +424,7 @@ public class ChatActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
+                        Log.d("Response block:", response.toString());
                     }
                 },
                 new Response.ErrorListener() {
