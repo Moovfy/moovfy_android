@@ -27,6 +27,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Authenticator;
+import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.Auth;
@@ -57,6 +58,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.moovfy.moovfy.security.RequestManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -97,6 +99,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         pas_t = findViewById(R.id.password);
 
         progressDialog = new ProgressDialog(this);
+        RequestManager requestManager = new RequestManager();
         queue = Volley.newRequestQueue(this);
 
        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)

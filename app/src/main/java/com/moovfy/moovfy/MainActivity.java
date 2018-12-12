@@ -61,6 +61,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.kosalgeek.android.photoutil.ImageLoader;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -86,6 +87,8 @@ import io.nlopez.smartlocation.location.config.LocationParams;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesProvider;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 import io.nlopez.smartlocation.location.utils.LocationState;
+
+import static java.lang.System.currentTimeMillis;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -133,7 +136,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(login);
             }
             else {
-
+                refreshToken();
                 SmartLocation.with(getApplicationContext()).location().start(locationListener);
                 if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
                     GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
@@ -480,6 +483,17 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    void refreshToken() {
+        String newToken = FirebaseInstanceId.getInstance().getToken();
+            Log.e("newToken", newToken);
+            DatabaseReference mDatabase;
+            mDatabase = FirebaseDatabase.getInstance().getReference();
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userUid = user.getUid();
+            mDatabase.child("users").child(userUid).child("token").setValue(newToken);
 
     }
 }
