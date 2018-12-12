@@ -194,7 +194,7 @@ public class Register extends AppCompatActivity {
         };
         queue.add(jsonobj);
 
-        queue = Volley.newRequestQueue(getApplicationContext());
+        //queue = Volley.newRequestQueue(getApplicationContext());
         String url2 = "http://10.4.41.143:3000/users/updateavatar/" + uid;
         JSONObject obj = new JSONObject();
         try {

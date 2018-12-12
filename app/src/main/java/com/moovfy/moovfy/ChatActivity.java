@@ -269,7 +269,7 @@ public class ChatActivity extends AppCompatActivity {
             return true;
         }
         else if (id == R.id.action_add && relation.equals("ok")) { //borrar amic
-            Toast.makeText(getApplicationContext(), "Friend removed", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Friend Removed", Toast.LENGTH_LONG).show();
             RemoveFriends(uid1,uid2);
             return true;
         }
@@ -349,7 +349,7 @@ public class ChatActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
+                        Log.d("Response add:", response.toString());
                     }
                 },
                 new Response.ErrorListener() {
@@ -367,8 +367,8 @@ public class ChatActivity extends AppCompatActivity {
 //!!!!!!!!!!!!!!!!!!!!!!!!
     private void RemoveFriends(String uid1,String uid2) {
 
-        String url = "http://10.4.41.143:3000/relations/add";
-
+        String url = "http://10.4.41.143:3000/relations";
+        Log.d("inside remove:", url);
 
         JSONObject json = new JSONObject();
 
@@ -382,17 +382,12 @@ public class ChatActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        try {
-            json.put("status", "ok");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
-        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.DELETE, url,json,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
+                        Log.d("Response delete:", response.toString());
                     }
                 },
                 new Response.ErrorListener() {
@@ -429,7 +424,7 @@ public class ChatActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
+                        Log.d("Response block:", response.toString());
                     }
                 },
                 new Response.ErrorListener() {
