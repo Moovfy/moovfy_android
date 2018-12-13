@@ -35,6 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.moovfy.moovfy.map.MapFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,7 +49,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 
@@ -56,12 +59,14 @@ import java.util.Random;
  * A simple {@link Fragment} subclass.
  */
 public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
-    public static final String EXTRA_MESSAGE = "";
+    public static final String EXTRA_MESSAGE = "uid";
+    public static final String RELATION = "relation";
     private RecyclerView recyclerListClose;
     private ListCloseAdapter adapter;
 
     List<User> userList = new ArrayList<>();
     List<String> uids = new ArrayList<>();
+    List<String> friends = new ArrayList<>(); //lista dels uids dels friends
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
@@ -85,8 +90,14 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             @Override
             public void onItemClick(String uid) {
                 Log.d("UIDagafat: ", "> " + uid);
+
                 Intent intent = new Intent(getContext(), ChatActivity.class);
                 intent.putExtra(EXTRA_MESSAGE, uid);
+                if (friends.contains(uid)) {
+                    intent.putExtra(CloseFragment.RELATION, "ok");
+                } else {
+                    intent.putExtra(CloseFragment.RELATION, "no");
+                }
                 startActivity(intent);
             }
         });
@@ -106,6 +117,8 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 updateList();
             }
         });
+
+
     }
 
     @Override
@@ -193,6 +206,10 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                 JSONObject e = jsonArray.getJSONObject(i);
                                 String uid = e.getString("uid");
 
+                                //afegeix a la llista de friends tots els friends
+                                if (e.getString("relation").equals("ok")){
+                                    friends.add(uid);
+                                }
 
                                     DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
                                     ref.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -209,6 +226,16 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                                         user.getName()
                                                 ));
                                                 uids.add(uid);
+
+                                                //--------------------------------------------
+                                                /*
+                                                Intent ii = new Intent("action_location_updated");
+                                                ii.putExtra("name", user.getName());
+                                                ii.putExtra("avatar", user.getAvatar());
+                                               // ii.putExtra("loc", )
+                                                getActivity().sendBroadcast(ii);
+                                                */
+                                                //-------------------------------------
                                             }
                                             adapter.notifyDataSetChanged();
 
@@ -324,7 +351,7 @@ class ListCloseAdapter extends RecyclerView.Adapter<ListCloseAdapter.ItemCloseVi
         public void bind(final User user, String uid, final OnItemClickListener listener) {
             textViewUsername.setText(user.getName());
             textViewDesc.setText(user.getEmail());
-            GlideApp.with(mContext).load(user.getAvatar()).into(imageView);
+            GlideApp.with(mContext).load(user.getAvatar()).thumbnail(0.1f).into(imageView);
 
 
             itemView.setOnClickListener(new View.OnClickListener() {

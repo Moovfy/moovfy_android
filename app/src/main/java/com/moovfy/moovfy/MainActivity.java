@@ -2,6 +2,8 @@ package com.moovfy.moovfy;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -10,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -65,6 +68,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.kosalgeek.android.photoutil.ImageLoader;
 import com.google.firebase.database.FirebaseDatabase;
+import com.moovfy.moovfy.map.MapFragment;
 
 import android.content.Context;
 import android.content.Intent;
@@ -74,11 +78,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import io.nlopez.smartlocation.OnActivityUpdatedListener;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
@@ -119,6 +130,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         Boolean firstRun = getSharedPreferences("PREFERENCE",MODE_PRIVATE).getBoolean("firstRun",true);
 
         if(firstRun) {
@@ -139,6 +152,33 @@ public class MainActivity extends AppCompatActivity
             }
             else {
                 refreshToken();
+
+
+                //------------------------------------------------
+                //queue = Volley.newRequestQueue(getApplicationContext());
+                String url3 = "http://10.4.41.143:3000/users/updateavatar/8qZ0q11nqSZPjbBooJn02kdsF7Y2";
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("avatar", "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url3, obj,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Log.d("Response", response.toString());
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.d("Error.Response", error.toString());
+                            }
+                        }
+                );
+                queue.add(jsonobj);
+                //------------------------------------------
                 SmartLocation.with(getApplicationContext()).location().start(locationListener);
                 if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
                     GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
@@ -251,8 +291,11 @@ public class MainActivity extends AppCompatActivity
                     public void onTabSelected(TabLayout.Tab tab) {
                         viewPager.setCurrentItem(tab.getPosition());
                         if (tab.getPosition() == 1) {
-
+                            Log.w("UUUUUU", "Friends");
+                            sendBroadcast(new Intent("cargarFriends"));
                         } else {
+                            Log.w("UUUUUU", "Near");
+                            sendBroadcast(new Intent("cargarNear"));
 
                         }
                     }
@@ -279,12 +322,9 @@ public class MainActivity extends AppCompatActivity
             }
         });*/
 
-
+/*
                 mAuth = FirebaseAuth.getInstance();
-
-
                 FirebaseUser currentUser2 = mAuth.getCurrentUser();
-
                 Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child(currentUser2.getUid());//currentUser.getUid()!!!!!!!!!!!!!!!!!!!!!!!!!
                 Log.w("UUUUUU", currentUser2.getUid());
                 ValueEventListener usuari1Listener = new ValueEventListener() {
@@ -303,6 +343,9 @@ public class MainActivity extends AppCompatActivity
 
                             GlideApp.with(getApplicationContext()).load(u.getAvatar()).into(ivImage);
 
+                            TextView name = findViewById((R.id.username));
+                            name.setText(u.getName());
+
                         }
                     }
 
@@ -312,10 +355,84 @@ public class MainActivity extends AppCompatActivity
                         Log.w("Chat", "loadUser1:onCancelled", databaseError.toException());
                     }
                 };
+
                 Ref_uid1.addValueEventListener(usuari1Listener);
+                */
+
+
+                String url = "http://10.4.41.143:3000/users/" + currentUser.getUid();
+                JsonTask t = new JsonTask();
+                t.execute(url);
             }
 
         }
+
+    }
+
+    private class JsonTask extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            HttpURLConnection connection = null;
+            BufferedReader reader = null;
+
+            try {
+                URL url = new URL(params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+
+                connection.connect();
+
+                InputStream stream = connection.getInputStream();
+
+                reader = new BufferedReader(new InputStreamReader(stream));
+
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line+"\n");
+                    Log.d("APIResponse: ", "> " + line);
+                }
+
+                return buffer.toString();
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+
+            ivImage = (ImageView) findViewById(R.id.profile_image);
+            try {
+                JSONObject obj = new JSONObject(s);
+
+                GlideApp.with(getApplicationContext()).load(obj.getString("avatar")).into(ivImage);
+
+                TextView name = findViewById((R.id.username));
+                name.setText(obj.getString("complete_name"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
 
     }
 
@@ -337,6 +454,8 @@ public class MainActivity extends AppCompatActivity
                 }
         );
         queue.add(jsonobj);
+
+
 
     }
 
@@ -364,12 +483,12 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
+/*
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
+*/
         return super.onOptionsItemSelected(item);
     }
 

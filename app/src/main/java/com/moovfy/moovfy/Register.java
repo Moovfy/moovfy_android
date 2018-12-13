@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -31,8 +32,7 @@ import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -119,18 +119,6 @@ public class Register extends AppCompatActivity {
                             String usern = user_t.getText().toString().trim();
                             String name = name_t.getText().toString().trim();
 
-                            try{
-                                String uri = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62";
-                                Log.d("URI created: ",uri.toString());
-                                DatabaseReference mDatabase;
-                                mDatabase = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
-                                Log.d("Registre user a BD" , "Estic fent el push");
-                                User usuari = new User(email,usern,uri,name);
-                                mDatabase.setValue(usuari);
-                            } catch (Exception e) {
-                                Log.e("URI Syntax Error: " , e.getMessage());
-                            }
-
                             JSONObject json = new JSONObject();
 
                             try {
@@ -154,9 +142,23 @@ public class Register extends AppCompatActivity {
                                 e.printStackTrace();
                             }
 
-                            pasar_datos(json);
+                            pasar_datos(json, user.getUid());
 
                             user.sendEmailVerification();
+
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                    .setPhotoUri(Uri.parse("C:\\Users\\Andoni\\Desktop\\Nueva carpeta (2)\\andoni\\moovfy_android-master\\moovfy_android-master\\app\\src\\main\\res\\drawable"))
+                                    .build();
+
+                            user.updateProfile(profileUpdates)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Log.d("profile", "User profile updated.");
+                                            }
+                                        }
+                                    });
 
 
                             getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putString("user_uid",user.getUid()).commit();
@@ -173,7 +175,7 @@ public class Register extends AppCompatActivity {
 
     }
 
-    private void pasar_datos(JSONObject json) {
+    private void pasar_datos(JSONObject json, String uid) {
         String url = "http://10.4.41.143:3000/users/register";
 
         JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
@@ -193,6 +195,32 @@ public class Register extends AppCompatActivity {
 
         };
         queue.add(jsonobj);
+
+        //queue = Volley.newRequestQueue(getApplicationContext());
+        String url2 = "http://10.4.41.143:3000/users/updateavatar/" + uid;
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("avatar", "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest jsonobj2 = new JsonObjectRequest(Request.Method.PUT, url2, obj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("Response update iamge:", response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Error.Response", error.toString());
+                    }
+                }
+        );
+        queue.add(jsonobj2);
+
+
 
     }
 

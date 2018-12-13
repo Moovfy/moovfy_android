@@ -12,13 +12,22 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,6 +42,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import static java.lang.System.currentTimeMillis;
@@ -49,6 +60,7 @@ public class ChatActivity extends AppCompatActivity {
     private String Chat_UID;
 
     private ImageButton btnEnviar;
+    private ImageButton btnFriend;
     private Button btnEnviarFoto;
     private EditText txtMensaje;
     private User usuari;
@@ -61,6 +73,12 @@ public class ChatActivity extends AppCompatActivity {
     String uid1;
     String uid2;
     private TextView nomuser;
+    private RequestQueue queue;
+    private boolean first;
+
+    Menu optionsMenu;
+
+    String relation = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,16 +86,17 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
 
-
         database = FirebaseDatabase.getInstance();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         uid1 = currentUser.getUid();
+        queue = Volley.newRequestQueue(this);
+        first = true;
         //uid1 = "2";
 
         Intent intent = getIntent();
-        uid2 = intent.getStringExtra(CloseFragment.EXTRA_MESSAGE);
-
+        uid2 = intent.getStringExtra("uid");
+        relation = intent.getStringExtra("relation");
 
         Chat_UID = get_chat_uid(uid1, uid2);
 
@@ -98,6 +117,7 @@ public class ChatActivity extends AppCompatActivity {
         nomuser = (TextView) findViewById(R.id.action_bar_title_1);
         btnEnviar = (ImageButton) findViewById(R.id.button_chatbox_send);
         btnEnviarFoto = (Button) findViewById(R.id.btnEnviarFoto);
+        //btnFriend = (ImageButton) findViewById(R.id.addfriends);
         txtMensaje  = (EditText) findViewById(R.id.edittext_chatbox);
         fotousuari = (ImageView) findViewById(R.id.conversation_contact_photo);
         mMessageRecycler = (RecyclerView) findViewById(R.id.reyclerview_message_list);
@@ -127,7 +147,7 @@ public class ChatActivity extends AppCompatActivity {
                 usuari2 = dataSnapshot.getValue(User.class);
                 Log.w("Chat22", usuari2.toString());
                 nomuser.setText(usuari2.getName());
-                Glide.with(ChatActivity.this).load(usuari2.getAvatar()).into(fotousuari);
+                Glide.with(getApplicationContext()).load(usuari2.getAvatar()).into(fotousuari);
             }
 
             @Override
@@ -144,11 +164,11 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String words = txtMensaje.getText().toString();
                 words = words.replace(System.getProperty("line.separator"), "");
-                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                Message mensaje = new Message(words,usuari2.getName(),uid1,currentTimeMillis());
+
+                Message mensaje = new Message(words,usuari1.getName(),uid1,currentTimeMillis());
+
                 DatabaseReference.push().setValue(mensaje);
                 String m = mensaje.getMessage();
-                System.out.println("estoy escribiendo en la base de datos el mensaje " + m);
                 Log.d("Chat", "estoy escribiendo en la base de datos el mensaje " + m);
                 txtMensaje.setText("");
                 usuari1.AddtoList(Chat_UID);
@@ -167,14 +187,29 @@ public class ChatActivity extends AppCompatActivity {
                 startActivityForResult(intent, UPLOAD_IMAGE);
             }
         });
-
-        mMessageAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+/*
+        btnFriend.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                super.onItemRangeInserted(positionStart, itemCount);
-                setScrollbar();
+            public void onClick(View v) {
+                if(first) {
+                    Toast.makeText(getApplicationContext(), "Added to friends", Toast.LENGTH_LONG).show();
+                    AddFriends(uid1, uid2);
+                    first = false;
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "You are his friend already", Toast.LENGTH_LONG).show();
+                }
             }
         });
+*/
+
+                mMessageAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                    @Override
+                    public void onItemRangeInserted(int positionStart, int itemCount) {
+                        super.onItemRangeInserted(positionStart, itemCount);
+                        setScrollbar();
+                    }
+                });
 
         DatabaseReference.addChildEventListener(new ChildEventListener() {
             @Override
@@ -205,6 +240,46 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        optionsMenu = menu;
+        if (relation.equals("ok")) {
+            optionsMenu.getItem(0).setTitle("Delete Friend");
+        } else if (relation.equals("donotshow")) {
+            optionsMenu.removeItem(R.id.action_add);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //afegir a Friends
+
+        if (id == R.id.action_add && relation.equals("no")) { //afegir amic
+            Toast.makeText(getApplicationContext(), "Added to Friends", Toast.LENGTH_LONG).show();
+            AddFriends(uid1,uid2);
+            return true;
+        }
+        else if (id == R.id.action_add && relation.equals("ok")) { //borrar amic
+            Toast.makeText(getApplicationContext(), "Friend Removed", Toast.LENGTH_LONG).show();
+            RemoveFriends(uid1,uid2);
+            return true;
+        }
+
+        else if (id == R.id.action_block){ //afegir a bloquejats
+            Toast.makeText(getApplicationContext(), "Added to Black List", Toast.LENGTH_LONG).show();
+            AddFBlackList(uid1,uid2);
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void setScrollbar(){
@@ -245,6 +320,124 @@ public class ChatActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void AddFriends(String uid1,String uid2) {
+
+        String url = "http://10.4.41.143:3000/relations/add";
+
+
+        JSONObject json = new JSONObject();
+
+        try {
+            json.put("firebase_uid1", uid1);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            json.put("firebase_uid2", uid2);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            json.put("status", "ok");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("Response add:", response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }
+        ){
+
+        };
+        queue.add(jsonobj);
+
+    }
+//!!!!!!!!!!!!!!!!!!!!!!!!
+    private void RemoveFriends(String uid1,String uid2) {
+
+        String url = "http://10.4.41.143:3000/relations";
+        Log.d("inside remove:", url);
+
+        JSONObject json = new JSONObject();
+
+        try {
+            json.put("firebase_uid1", uid1);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            json.put("firebase_uid2", uid2);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("Response delete:", response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }
+        ){
+
+        };
+        queue.add(jsonobj);
+
+    }
+
+    private void AddFBlackList(String uid1, String uid2) {
+        String url = "http://10.4.41.143:3000/relations/block";
+
+
+        JSONObject json = new JSONObject();
+
+        try {
+            json.put("firebase_uid1", uid1);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            json.put("firebase_uid2", uid2);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("Response block:", response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }
+        ){
+
+        };
+        queue.add(jsonobj);
+
     }
 
 
