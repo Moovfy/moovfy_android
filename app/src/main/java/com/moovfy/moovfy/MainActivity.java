@@ -64,6 +64,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.kosalgeek.android.photoutil.ImageLoader;
 import com.google.firebase.database.FirebaseDatabase;
 import com.moovfy.moovfy.map.MapFragment;
@@ -98,6 +100,8 @@ import io.nlopez.smartlocation.location.config.LocationParams;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesProvider;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 import io.nlopez.smartlocation.location.utils.LocationState;
+
+import static java.lang.System.currentTimeMillis;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -147,6 +151,8 @@ public class MainActivity extends AppCompatActivity
                 startActivity(login);
             }
             else {
+                refreshToken();
+
 
                 //------------------------------------------------
                 //queue = Volley.newRequestQueue(getApplicationContext());
@@ -173,8 +179,6 @@ public class MainActivity extends AppCompatActivity
                 );
                 queue.add(jsonobj);
                 //------------------------------------------
-
-
                 SmartLocation.with(getApplicationContext()).location().start(locationListener);
                 if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
                     GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
@@ -602,4 +606,27 @@ public class MainActivity extends AppCompatActivity
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
+    public void refreshToken() {
+        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+            @Override
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                if(!task.isSuccessful()){
+                    Log.w("getInstanceIdFailed","Failed",task.getException());
+                    return;
+                }
+
+                String token = task.getResult().getToken();
+                Log.d("FIREBASE MESSAGING", "Refreshed token: " + token);
+                DatabaseReference mDatabase;
+                mDatabase = FirebaseDatabase.getInstance().getReference();
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                String userUid = user.getUid();
+                mDatabase.child("users").child(userUid).child("token").setValue(token);
+
+            }
+        });
+
+    }
+
 }
