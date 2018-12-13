@@ -62,6 +62,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.kosalgeek.android.photoutil.ImageLoader;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -77,6 +78,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import io.nlopez.smartlocation.OnActivityUpdatedListener;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
@@ -486,14 +488,26 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    void refreshToken() {
-        String newToken = FirebaseInstanceId.getInstance().getToken();
-            Log.e("newToken", newToken);
-            DatabaseReference mDatabase;
-            mDatabase = FirebaseDatabase.getInstance().getReference();
-            FirebaseUser user = mAuth.getCurrentUser();
-            String userUid = user.getUid();
-            mDatabase.child("users").child(userUid).child("token").setValue(newToken);
+    public void refreshToken() {
+        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+            @Override
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                if(!task.isSuccessful()){
+                    Log.w("getInstanceIdFailed","Failed",task.getException());
+                    return;
+                }
+
+                String token = task.getResult().getToken();
+                Log.d("FIREBASE MESSAGING", "Refreshed token: " + token);
+                DatabaseReference mDatabase;
+                mDatabase = FirebaseDatabase.getInstance().getReference();
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                String userUid = user.getUid();
+                mDatabase.child("users").child(userUid).child("token").setValue(token);
+
+            }
+        });
 
     }
+
 }
