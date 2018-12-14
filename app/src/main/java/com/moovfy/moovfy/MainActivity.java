@@ -25,9 +25,12 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -79,6 +82,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -102,7 +106,7 @@ import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWith
 import io.nlopez.smartlocation.location.utils.LocationState;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, SearchView.OnQueryTextListener {
+        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, SearchView.OnQueryTextListener, SearchView.OnCloseListener {
     private FirebaseAuth mAuth;
     private RequestQueue queue;
     private LocationGooglePlayServicesProvider provider;
@@ -110,9 +114,9 @@ public class MainActivity extends AppCompatActivity
     Button chan;
     final static int REQUEST_LOCATION = 199;
     SearchView se;
-    ListView list;
+   ListView list;
     ArrayList<String> arrayList;
-    ArrayAdapter<String> adapter;
+   ArrayAdapter<String> adapter;
 
 
     /*
@@ -288,58 +292,21 @@ public class MainActivity extends AppCompatActivity
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         //------------------------------------
 
-       /* chan = findViewById(R.id.but);
-        chan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent change_i = new Intent(getApplicationContext(),choose_image.class);
-                startActivity(change_i);
-            }
-        });*/
 
 
 
         FirebaseUser currentUser2 = mAuth.getCurrentUser();
 
-       /* Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child(currentUser2.getUid());//currentUser.getUid()!!!!!!!!!!!!!!!!!!!!!!!!!
-        Log.w("UUUUUU", currentUser2.getUid());
-        ValueEventListener usuari1Listener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // Get Post object and use the values to update the UI
-
-
-
-                User u = dataSnapshot.getValue(User.class);
-                Log.w("aaaaaaaaaaaaaaaaaaaaa", u.getAvatar());
-                if (u != null) {
-                    if (ivImage == null) {
-                        Log.w("imagenulll", u.getAvatar());
-                    }
-                    ivImage = (ImageView) findViewById(R.id.profile_image);
-
-                    GlideApp.with(getApplicationContext()).load(u.getAvatar()).into(ivImage);
-
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Getting Post failed, log a message
-                Log.w("Chat", "loadUser1:onCancelled", databaseError.toException());
-            }
-        };
-        Ref_uid1.addValueEventListener(usuari1Listener);*/
-
 
        ///
 
-        list = (ListView) findViewById(R.id.listV);
+       list = (ListView) findViewById(R.id.listV);
         arrayList = new ArrayList<String>();
         adapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,arrayList);
-        list.setAdapter(adapter);
+       list.setAdapter(adapter);
         se = (SearchView) findViewById(R.id.searchView);
         se.setOnQueryTextListener(this);
+        se.setOnCloseListener(this::onClose);
         Toast.makeText(this,"h" , Toast.LENGTH_SHORT).show();
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -348,6 +315,7 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
+
 
 
     }
@@ -561,14 +529,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onQueryTextSubmit(String s) {
-        Toast.makeText(this, "Query Inserted", Toast.LENGTH_SHORT).show();
         buscar(s);
         return true;
     }
 
     @Override
     public boolean onQueryTextChange(String s) {
-       // Toast.makeText(this, "Query Inserted2", Toast.LENGTH_SHORT).show();
+        buscar(s);
         return true;
     }
 
@@ -582,11 +549,21 @@ public class MainActivity extends AppCompatActivity
             // Get total height of all items.
             int totalItemsHeight = 0;
 
-            for (int itemPos = 0; itemPos < numberOfItems; itemPos++) {
-                View item = listAdapter.getView(itemPos, null, listView);
-                float px = 500 * (listView.getResources().getDisplayMetrics().density);
-                item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-                totalItemsHeight += item.getMeasuredHeight();
+            if (numberOfItems <= 10) {
+                for (int itemPos = 0; itemPos < numberOfItems; itemPos++) {
+                    View item = listAdapter.getView(itemPos, null, listView);
+                    float px = 500 * (listView.getResources().getDisplayMetrics().density);
+                    item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                    totalItemsHeight += item.getMeasuredHeight();
+                }
+            }
+            else {
+                for (int itemPos = 0; itemPos < 10; itemPos++) {
+                    View item = listAdapter.getView(itemPos, null, listView);
+                    float px = 500 * (listView.getResources().getDisplayMetrics().density);
+                    item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                    totalItemsHeight += item.getMeasuredHeight();
+                }
             }
 
 
@@ -611,5 +588,14 @@ public class MainActivity extends AppCompatActivity
             return false;
         }
 
+    }
+
+
+    @Override
+    public boolean onClose() {
+        adapter.clear();
+        adapter.notifyDataSetChanged();
+        setListViewHeightBasedOnItems(list);
+        return false;
     }
 }
