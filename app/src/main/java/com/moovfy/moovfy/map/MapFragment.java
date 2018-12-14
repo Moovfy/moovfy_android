@@ -86,70 +86,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             mMapView.getMapAsync(this);
         }
         mReceiver = new BroadcastReceiver() {
-
             @Override
             public void onReceive(Context context, Intent intent) {
                 String uid = "";
                 FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
                 if (currentFirebaseUser != null) {
                     uid = currentFirebaseUser.getUid();
-                } else {
-                    Log.d("APIResponse3: ", "> " + "Usuari null");
+                    if ("cargarNear".equals(intent.getAction())) {
+
+                        String url = "http://10.4.41.143:3000/near/" + uid;
+                        JsonTaskUpdateMap t = new JsonTaskUpdateMap();
+                        t.execute(url);
+                    }
+
+                    if ("cargarFriends".equals(intent.getAction())) {
+
+                        String url = "http://10.4.41.143:3000/friends/" + uid;
+                        JsonTaskUpdateMap t = new JsonTaskUpdateMap();
+                        t.execute(url);
+                    }
                 }
 
-                if ("cargarNear".equals(intent.getAction())) {
-
-                    String url = "http://10.4.41.143:3000/near/" + uid;
-                    JsonTaskUpdateMap t = new JsonTaskUpdateMap();
-                    t.execute(url);
-                    Log.d("NEEEEARRR", "NEAR");
-
-                }
-                /*
-                else if ("cargarFriends".equals(intent.getAction())) {
-                    Log.d("FFFFFFFFFFFFFFFFFFFF", "friends");
-                    String url = "http://10.4.41.143:3000/friends/" + uid;
-                    JsonTaskUpdateMap t = new JsonTaskUpdateMap();
-                    //t.execute(url);
-                }
-                */
-            }
-        };
-        mReceiver2 = new BroadcastReceiver() {
-
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String uid = "";
-                FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
-                if (currentFirebaseUser != null) {
-                    uid = currentFirebaseUser.getUid();
-                } else {
-                    Log.d("APIResponse3: ", "> " + "Usuari null");
-                }
-
-                if ("cargarFriends".equals(intent.getAction())) {
-                    Log.d("ExecutantFriends: ", "> " + "Usuari null");
-                    String url = "http://10.4.41.143:3000/friends/" + uid;
-                    JsonTaskUpdateMap t = new JsonTaskUpdateMap();
-                    t.execute(url);
-
-                }
-                /*
-                else if ("cargarFriends".equals(intent.getAction())) {
-                    Log.d("FFFFFFFFFFFFFFFFFFFF", "friends");
-                    String url = "http://10.4.41.143:3000/friends/" + uid;
-                    JsonTaskUpdateMap t = new JsonTaskUpdateMap();
-                    //t.execute(url);
-                }
-                */
             }
         };
 
-        IntentFilter filter2 = new IntentFilter("cargarFriends");
-        IntentFilter filter3 = new IntentFilter("cargarNear");
+        IntentFilter filter = new IntentFilter("cargarFriends");
+        filter.addAction("cargarNear");
+        getContext().registerReceiver(mReceiver,filter);
 
-        getContext().registerReceiver(mReceiver,filter3);
-        getContext().registerReceiver(mReceiver2,filter2);
 
     }
 
@@ -169,7 +133,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         addMapMarkers();
         mGoogleMap.getUiSettings().setAllGesturesEnabled(false);
         mGoogleMap.getUiSettings().setZoomGesturesEnabled(true);
-
 
     }
 
@@ -429,7 +392,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
             String latlng[] = s.split("\\|");
             LatLng position = new LatLng(Double.parseDouble(latlng[0]), Double.parseDouble(latlng[1]));
-            mGoogleMap.moveCamera( CameraUpdateFactory.newLatLngZoom(position, 18.0f) );
+            mGoogleMap.moveCamera( CameraUpdateFactory.newLatLngZoom(position, 16.0f) );
 
         }
 
