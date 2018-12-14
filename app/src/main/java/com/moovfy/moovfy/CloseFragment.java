@@ -134,8 +134,10 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
+                    getActivity().sendBroadcast(new Intent("cargarNear"));
                     mSwipeRefreshLayout.setRefreshing(true);
                     updateList();
+
                 }
             });
         }
@@ -226,7 +228,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                                         user.getName()
                                                 ));
                                                 uids.add(uid);
-
+                                                Log.d("Avatarurl", user.getEmail() + user.getAvatar());
                                                 //--------------------------------------------
                                                 /*
                                                 Intent ii = new Intent("action_location_updated");
@@ -288,6 +290,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
             mSwipeRefreshLayout.setRefreshing(false);
 
+            getActivity().sendBroadcast(new Intent("cargarNear"));
         }
 
 

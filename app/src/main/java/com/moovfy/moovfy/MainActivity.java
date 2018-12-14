@@ -365,6 +365,8 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+
+
     private class JsonTask extends AsyncTask<String, String, String> {
 
         @Override
@@ -503,8 +505,6 @@ public class MainActivity extends AppCompatActivity
 
             Intent intent = new Intent(this, EditProfile.class);
             startActivity(intent);
-        } else if (id == R.id.nav_invite) {
-
         } else if (id == R.id.nav_black_list) {
            Intent intent = new Intent(this, BlackListActivity.class);
            startActivity(intent);
@@ -524,6 +524,7 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
     //LOCATION FUNCTIONS
     OnLocationUpdatedListener locationListener = new OnLocationUpdatedListener() {
