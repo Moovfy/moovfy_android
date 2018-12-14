@@ -110,8 +110,10 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
+                    getActivity().sendBroadcast(new Intent("cargarFriends"));
                     mSwipeRefreshLayout.setRefreshing(true);
                     updateList();
+
                 }
             });
         }

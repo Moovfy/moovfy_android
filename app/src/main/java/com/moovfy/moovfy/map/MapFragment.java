@@ -189,7 +189,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 );
                 mClusterManager.setRenderer(mClusterManagerRenderer);
             }
-
+/*
             String uid = "";
             FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
             if (currentFirebaseUser != null) {
@@ -200,7 +200,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             String url = "http://10.4.41.143:3000/near/" + uid;
             JsonTaskUpdateMap t = new JsonTaskUpdateMap();
             t.execute(url);
-
+*/
         }
     }
 
