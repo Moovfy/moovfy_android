@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -168,16 +169,19 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                 //dataSnapshot.getRef().child(chatuid).removeValue();
 
 
-                DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference("users").child(myuid);
+                DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference("users").child(myuid).child("ChatsOberts");
                 ref2.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d("ChatsOberts", dataSnapshot.toString());
+                        /*
                         User user =  dataSnapshot.getValue(User.class);
                         int index = user.getChatsOberts().indexOf(chatuid);
                         if (index != -1) {
                             user.deleteListItem(index);
                         }
                         ref2.setValue(user);
+                        */
 
                     }
 
@@ -247,6 +251,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Get Post object and use the values to update the UI
+                Log.d("ChatsOOOO", dataSnapshot.toString());
                 chatsOberts = dataSnapshot.getValue(User.class);
                 listChatsOberts = chatsOberts.getChatsOberts();
                 for (int i = 0; i < listChatsOberts.size(); i++) {
@@ -257,7 +262,6 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                     FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
                     if (currentFirebaseUser != null) {
                         currentuid = currentFirebaseUser.getUid();
-                      //  currentuid = "2"; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
                         Log.d("Current UId: ", "> " + currentuid);
                     } else {
                         Log.d("Current UId: ", "> " + "Usuari null");
@@ -266,11 +270,19 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                     for (String s : ids) {
                         if (!s.equals(currentuid)) {
 
+                            String url = "https://10.4.41.143:3001/users/" + s;
+                            uids.add(s);
+                            String[] params = {url, chatid};
+                            JsonTask t = new JsonTask();
+                            t.execute(params);
+
+/*
                             DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(s);
                             ref.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     Log.d("USSSSSS", "> " + dataSnapshot.toString());
+
                                     User user =  dataSnapshot.getValue(User.class);
 
 
@@ -315,7 +327,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                                 }
 
                             });
-
+*/
 
                         }
                     }
@@ -335,6 +347,8 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
 
     }
 
+
+
     private class restaurarDB {
         List<Message> msgs;
         User u1;
@@ -348,103 +362,101 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
 
     }
 
-    private class JsonTask extends AsyncTask<String, String, String> {
+    private class JsonTask extends AsyncTask<String, String, ArrayList<String>> {
 
         @Override
-        protected String doInBackground(String... params) {
-            HttpURLConnection connection = null;
-            BufferedReader reader = null;
-
+        protected ArrayList<String> doInBackground(String... params) {
+            HttpURLConnection con = null;
+            BufferedReader rd = null;
             try {
-                URL url = new URL(params[0]);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.connect();
-                connection.setConnectTimeout(5000);
-                connection.setReadTimeout(5000);
-                InputStream stream = connection.getInputStream();
+                URL purl = new URL(params[0]);
+                con = (HttpURLConnection) purl.openConnection();
+                StringBuffer buff = new StringBuffer();
+                con.connect();
 
-                reader = new BufferedReader(new InputStreamReader(stream));
+                InputStream strm = con.getInputStream();
 
-                StringBuffer buffer = new StringBuffer();
-                String line = "";
+                rd = new BufferedReader(new InputStreamReader(strm));
 
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line+"\n");
-                    Log.d("APIResponse: ", "> " + line);
+                String line2 = "";
+
+                while ((line2 = rd.readLine()) != null) {
+                    buff.append(line2+"\n");
+                    Log.d("APIResCloseList: ", "> " + line2);
+                }
+
+                JSONObject jsonArrayUser = new JSONObject(buff.toString());
+                ArrayList<String> list = new ArrayList<>();
+                list.add(jsonArrayUser.toString());
+                list.add(params[1]);
+
+                return list;
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            finally {
+                if (con != null) {
+                    con.disconnect();
                 }
                 try {
-                    if (buffer.toString() != null) {
-
-                        JSONObject jsonObject = new JSONObject(buffer.toString());
-                        if (jsonObject != null) {
-
-                                String uid = jsonObject.getString("firebase_uid");
-
-
-                                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
-                                ref.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        User user =  dataSnapshot.getValue(User.class);
-
-                                        userList.add(new User(
-                                                user.getEmail(),
-                                                user.getUsername(),
-                                                user.getAvatar(),
-                                                user.getName()
-                                        ));
-                                        uids.add(uid);
-                                        adapter.notifyDataSetChanged();
-
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                    }
-
-                                });
-
-
-                        }
-
-
+                    if (rd != null) {
+                        rd.close();
                     }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-
-
-
-                return buffer.toString();
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
-                try {
-                    if (reader != null) {
-                        reader.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
                 }
             }
+
             return null;
         }
 
         @Override
-        protected void onPostExecute(String s) {
+        protected void onPostExecute(ArrayList<String> s) {
 
-            Log.d("UrlRequestedss: ", "> " + s);
-            adapter.notifyDataSetChanged();
-            mSwipeRefreshLayout.setRefreshing(false);
+            try {
+                JSONObject obj = new JSONObject(s.get(0));
+                User u = new User(
+                        obj.getString("email"),
+                        obj.getString("username"),
+                        obj.getString("avatar"),
+                        obj.getString("complete_name")
+                );
+
+                Query ref2 = FirebaseDatabase.getInstance().getReference("messages").child(s.get(1)).orderByKey().limitToLast(1);
+                ref2.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        String mm = "";
+                        String time = "";
+                        for (DataSnapshot child : dataSnapshot.getChildren()){
+
+                            mm = child.child("message").getValue().toString();
+                            time =  child.child("time").getValue().toString();
+
+                        }
+                        u.setEmail(mm); //ultim missatge guardat en el email
+                        u.setDesc(time);
+
+                        userList.add(u);
+
+                        adapter.notifyDataSetChanged();
+                        mSwipeRefreshLayout.setRefreshing(false);
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+
+                });
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
         }
 

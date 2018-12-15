@@ -114,6 +114,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             @Override
             public void run() {
                 mSwipeRefreshLayout.setRefreshing(true);
+                Log.d("AAAAAAAAAAAAAAAAA", "porque");
                 updateList();
             }
         });
@@ -134,8 +135,9 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
-                    getActivity().sendBroadcast(new Intent("cargarNear"));
+
                     mSwipeRefreshLayout.setRefreshing(true);
+                    Log.d("aaaaaa222aa","manual refrehs");
                     updateList();
 
                 }
@@ -160,7 +162,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         } else {
             Log.d("APIResponse3: ", "> " + "Usuari null");
         }
-        Log.d("UrlRequested: ", "> " + url);
+        Log.d("UrlRequested222aa: ", "> " + url);
         JsonTask t = new JsonTask();
         t.execute(url);
 
@@ -181,8 +183,10 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         protected String doInBackground(String... params) {
             HttpURLConnection connection = null;
             BufferedReader reader = null;
-
+            StringBuffer buffer = new StringBuffer();
+            Log.d("Aquiiii22", "hol2a");
             try {
+                Log.d("Aquiiii22", "hola");
                 URL url = new URL(params[0]);
                 connection = (HttpURLConnection) url.openConnection();
 
@@ -192,12 +196,13 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
                 reader = new BufferedReader(new InputStreamReader(stream));
 
-                StringBuffer buffer = new StringBuffer();
+
                 String line = "";
 
                 while ((line = reader.readLine()) != null) {
                     buffer.append(line+"\n");
-                    Log.d("APIResponse: ", "> " + line);
+                    Log.d("Aquiiii22", "hola");
+                    Log.d("APIResponse222zzz: ", "> " + line);
                 }
                 try {
                     if (buffer.toString() != null) {
@@ -213,6 +218,49 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                     friends.add(uid);
                                 }
 
+                                HttpURLConnection con = null;
+                                BufferedReader rd = null;
+                                try {
+                                    URL purl = new URL("https://10.4.41.143:3001/users/" + uid);
+                                    con = (HttpURLConnection) purl.openConnection();
+                                    StringBuffer buff = new StringBuffer();
+                                    con.connect();
+
+                                    InputStream strm = con.getInputStream();
+
+                                    rd = new BufferedReader(new InputStreamReader(strm));
+
+                                    String line2 = "";
+
+                                    while ((line2 = rd.readLine()) != null) {
+                                        buff.append(line2+"\n");
+                                        Log.d("APIResCloseList: ", "> " + line2);
+                                    }
+
+                                    JSONObject jsonArrayUser = new JSONObject(buff.toString());
+                                    userList.add(new User(
+                                            jsonArrayUser.getString("email"),
+                                            jsonArrayUser.getString("username"),
+                                            jsonArrayUser.getString("avatar"),
+                                            jsonArrayUser.getString("complete_name")
+                                    ));
+                                    uids.add(uid);
+
+                                    adapter.notifyDataSetChanged();
+                                } finally {
+                                    if (con != null) {
+                                        con.disconnect();
+                                    }
+                                    try {
+                                        if (rd != null) {
+                                            rd.close();
+                                        }
+                                    } catch (IOException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+
+/*
                                     DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
                                     ref.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
@@ -238,8 +286,10 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                                 getActivity().sendBroadcast(ii);
                                                 */
                                                 //-------------------------------------
+                                /*
                                             }
                                             adapter.notifyDataSetChanged();
+                                            mSwipeRefreshLayout.setRefreshing(false);
 
                                         }
 
@@ -249,6 +299,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                         }
 
                                     });
+*/
 
                             }
                         }
@@ -261,12 +312,10 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 }
 
 
-
+                Log.d("BufferTo", buffer.toString());
                 return buffer.toString();
 
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 if (connection != null) {
@@ -280,13 +329,15 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                     e.printStackTrace();
                 }
             }
-            return null;
+            Log.d("BufferTo2", buffer.toString());
+            return buffer.toString();
         }
 
         @Override
         protected void onPostExecute(String s) {
-
+            Log.d("BufferTo233", s);
             Log.d("UrlRequestedss: ", "> " + s);
+            adapter.notifyDataSetChanged();
 
             mSwipeRefreshLayout.setRefreshing(false);
 

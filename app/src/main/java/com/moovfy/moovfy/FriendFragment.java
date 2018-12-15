@@ -162,7 +162,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
                 while ((line = reader.readLine()) != null) {
                     buffer.append(line+"\n");
-                    Log.d("APIResponse: ", "> " + line);
+                    Log.d("APIResponse22222xx: ", "> " + line);
                 }
                 try {
                     if (buffer.toString() != null) {
@@ -173,7 +173,49 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                                 JSONObject e = jsonArray.getJSONObject(i);
                                 String uid = e.getString("uid");
 
+                                HttpURLConnection con = null;
+                                BufferedReader rd = null;
+                                try {
+                                    URL purl = new URL("https://10.4.41.143:3001/users/" + uid);
+                                    con = (HttpURLConnection) purl.openConnection();
+                                    StringBuffer buff = new StringBuffer();
+                                    con.connect();
 
+                                    InputStream strm = con.getInputStream();
+
+                                    rd = new BufferedReader(new InputStreamReader(strm));
+
+                                    String line2 = "";
+
+                                    while ((line2 = rd.readLine()) != null) {
+                                        buff.append(line2+"\n");
+                                        Log.d("APIResCloseList: ", "> " + line2);
+                                    }
+
+                                    JSONObject jsonArrayUser = new JSONObject(buff.toString());
+                                    userList.add(new User(
+                                            jsonArrayUser.getString("email"),
+                                            jsonArrayUser.getString("username"),
+                                            jsonArrayUser.getString("avatar"),
+                                            jsonArrayUser.getString("complete_name")
+                                    ));
+                                    uids.add(uid);
+
+                                    adapter.notifyDataSetChanged();
+                                } finally {
+                                    if (con != null) {
+                                        con.disconnect();
+                                    }
+                                    try {
+                                        if (rd != null) {
+                                            rd.close();
+                                        }
+                                    } catch (IOException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+
+/*
                                 DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
                                 ref.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
@@ -191,6 +233,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                                             uids.add(uid);
                                         }
                                         adapter.notifyDataSetChanged();
+                                        mSwipeRefreshLayout.setRefreshing(false);
 
                                     }
 
@@ -200,7 +243,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                                     }
 
                                 });
-
+*/
                             }
                         }
 
@@ -239,6 +282,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
         protected void onPostExecute(String s) {
 
             Log.d("UrlRequestedss: ", "> " + s);
+            adapter.notifyDataSetChanged();
             mSwipeRefreshLayout.setRefreshing(false);
 
         }
