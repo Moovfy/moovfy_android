@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -286,6 +287,16 @@ public class ChatActivity extends AppCompatActivity {
         mMessageRecycler.scrollToPosition(mMessageAdapter.getItemCount()-1);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) // Press Back Icon
+        {
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -324,7 +335,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void AddFriends(String uid1,String uid2) {
 
-        String url = "http://10.4.41.143:3000/relations/add";
+        String url = "https://10.4.41.143:3001/relations/add";
 
 
         JSONObject json = new JSONObject();
@@ -367,7 +378,7 @@ public class ChatActivity extends AppCompatActivity {
 //!!!!!!!!!!!!!!!!!!!!!!!!
     private void RemoveFriends(String uid1,String uid2) {
 
-        String url = "http://10.4.41.143:3000/relations";
+        String url = "https://10.4.41.143:3001/relations";
         Log.d("inside remove:", url);
 
         JSONObject json = new JSONObject();
@@ -404,7 +415,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void AddFBlackList(String uid1, String uid2) {
-        String url = "http://10.4.41.143:3000/relations/block";
+        String url = "https://10.4.41.143:3001/relations/block";
 
 
         JSONObject json = new JSONObject();

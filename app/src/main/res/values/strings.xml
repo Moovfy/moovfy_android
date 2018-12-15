@@ -33,6 +33,6 @@
 
 
     <string name="menu_refresh">Refresh</string>
-
+    <string name="default_notification_channel_id">moovfy_channel</string>
 
 </resources>
