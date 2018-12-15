@@ -168,6 +168,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         addMapMarkers();
         mGoogleMap.getUiSettings().setAllGesturesEnabled(false);
+        mGoogleMap.getUiSettings().setZoomGesturesEnabled(true);
 
 
     }
@@ -188,7 +189,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 );
                 mClusterManager.setRenderer(mClusterManagerRenderer);
             }
-
+/*
             String uid = "";
             FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
             if (currentFirebaseUser != null) {
@@ -199,6 +200,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             String url = "http://10.4.41.143:3000/near/" + uid;
             JsonTaskUpdateMap t = new JsonTaskUpdateMap();
             t.execute(url);
+*/
         }
     }
 
@@ -277,10 +279,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                         String avatar = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62"; // set the default avatar
                         if (myuser.getString("avatar") != null) {
+                            Log.d("acces url", myuser.getString("avatar"));
                             avatar = myuser.getString("avatar");
                         }
                         URL imageurl = new URL(avatar);
+
                         Bitmap bmp = BitmapFactory.decodeStream(imageurl.openConnection().getInputStream());
+                       // Bitmap mOriginalBitmap = Bitmap.createScaledBitmap(bmp, 20, 20, true);
 
                         ClusterMarker newClusterMarker = new ClusterMarker(
                                 myposition,
@@ -340,7 +345,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                                         URL imageurl = new URL(avatar);
                                         Bitmap bmp = BitmapFactory.decodeStream(imageurl.openConnection().getInputStream());
-
+                                       // Bitmap mOriginalBitmap = Bitmap.createScaledBitmap(bmp, 20, 20, true);
+                                        // Bitmap bmp = null;
 
                                         ClusterMarker newClusterMarker = new ClusterMarker(
                                                 newposition,

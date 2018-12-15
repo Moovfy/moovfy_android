@@ -78,6 +78,7 @@ dependencies {
 
 
     annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
+    implementation 'com.google.firebase:firebase-messaging:17.3.1'
 
 
     //Image GIF
@@ -88,3 +89,4 @@ dependencies {
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: "androidx.navigation.safeargs"
+com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true

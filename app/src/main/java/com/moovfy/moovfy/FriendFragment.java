@@ -48,7 +48,8 @@ import org.json.JSONObject;
  * A simple {@link Fragment} subclass.
  */
 public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
-    public static final String EXTRA_MESSAGE = "";
+    public static final String EXTRA_MESSAGE = "uid";
+    public static final String RELATION = "relation";
     private RecyclerView recyclerListFriends;
     private ListFriendsAdapter adapter;
 
@@ -75,6 +76,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
             public void onItemClick(String uid) {
                 Log.d("UIDagafat: ", "> " + uid);
                 Intent intent = new Intent(getContext(), ChatActivity.class);
+                intent.putExtra(FriendFragment.RELATION, "ok");
                 intent.putExtra(EXTRA_MESSAGE, uid);
                 startActivity(intent);
             }
@@ -108,8 +110,10 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
+                    getActivity().sendBroadcast(new Intent("cargarFriends"));
                     mSwipeRefreshLayout.setRefreshing(true);
                     updateList();
+
                 }
             });
         }

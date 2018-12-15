@@ -49,7 +49,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 
@@ -57,12 +59,14 @@ import java.util.Random;
  * A simple {@link Fragment} subclass.
  */
 public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
-    public static final String EXTRA_MESSAGE = "";
+    public static final String EXTRA_MESSAGE = "uid";
+    public static final String RELATION = "relation";
     private RecyclerView recyclerListClose;
     private ListCloseAdapter adapter;
 
     List<User> userList = new ArrayList<>();
     List<String> uids = new ArrayList<>();
+    List<String> friends = new ArrayList<>(); //lista dels uids dels friends
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
@@ -86,8 +90,14 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             @Override
             public void onItemClick(String uid) {
                 Log.d("UIDagafat: ", "> " + uid);
+
                 Intent intent = new Intent(getContext(), ChatActivity.class);
                 intent.putExtra(EXTRA_MESSAGE, uid);
+                if (friends.contains(uid)) {
+                    intent.putExtra(CloseFragment.RELATION, "ok");
+                } else {
+                    intent.putExtra(CloseFragment.RELATION, "no");
+                }
                 startActivity(intent);
             }
         });
@@ -124,8 +134,10 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
+                    getActivity().sendBroadcast(new Intent("cargarNear"));
                     mSwipeRefreshLayout.setRefreshing(true);
                     updateList();
+
                 }
             });
         }
@@ -196,6 +208,10 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                 JSONObject e = jsonArray.getJSONObject(i);
                                 String uid = e.getString("uid");
 
+                                //afegeix a la llista de friends tots els friends
+                                if (e.getString("relation").equals("ok")){
+                                    friends.add(uid);
+                                }
 
                                     DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
                                     ref.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -212,7 +228,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                                         user.getName()
                                                 ));
                                                 uids.add(uid);
-
+                                                Log.d("Avatarurl", user.getEmail() + user.getAvatar());
                                                 //--------------------------------------------
                                                 /*
                                                 Intent ii = new Intent("action_location_updated");
@@ -274,6 +290,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
             mSwipeRefreshLayout.setRefreshing(false);
 
+            getActivity().sendBroadcast(new Intent("cargarNear"));
         }
 
 
