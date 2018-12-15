@@ -99,7 +99,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                 if ("cargarNear".equals(intent.getAction())) {
 
-                    String url = "http://10.4.41.143:3000/near/" + uid;
+                    String url = "https://10.4.41.143:3001/near/" + uid;
                     JsonTaskUpdateMap t = new JsonTaskUpdateMap();
                     t.execute(url);
                     Log.d("NEEEEARRR", "NEAR");
@@ -108,7 +108,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 /*
                 else if ("cargarFriends".equals(intent.getAction())) {
                     Log.d("FFFFFFFFFFFFFFFFFFFF", "friends");
-                    String url = "http://10.4.41.143:3000/friends/" + uid;
+                    String url = "https://10.4.41.143:3001/friends/" + uid;
                     JsonTaskUpdateMap t = new JsonTaskUpdateMap();
                     //t.execute(url);
                 }
@@ -129,7 +129,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                 if ("cargarFriends".equals(intent.getAction())) {
                     Log.d("ExecutantFriends: ", "> " + "Usuari null");
-                    String url = "http://10.4.41.143:3000/friends/" + uid;
+                    String url = "https://10.4.41.143:3001/friends/" + uid;
                     JsonTaskUpdateMap t = new JsonTaskUpdateMap();
                     t.execute(url);
 
@@ -137,7 +137,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 /*
                 else if ("cargarFriends".equals(intent.getAction())) {
                     Log.d("FFFFFFFFFFFFFFFFFFFF", "friends");
-                    String url = "http://10.4.41.143:3000/friends/" + uid;
+                    String url = "https://10.4.41.143:3001/friends/" + uid;
                     JsonTaskUpdateMap t = new JsonTaskUpdateMap();
                     //t.execute(url);
                 }
@@ -197,7 +197,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             } else {
                 Log.d("APIResponse3: ", "> " + "Usuari null");
             }
-            String url = "http://10.4.41.143:3000/near/" + uid;
+            String url = "https://10.4.41.143:3001/near/" + uid;
             JsonTaskUpdateMap t = new JsonTaskUpdateMap();
             t.execute(url);
 */
@@ -247,7 +247,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     }
 
 
-                    URL url2 = new URL("http://10.4.41.143:3000/users/" + myuid);
+                    URL url2 = new URL("https://10.4.41.143:3001/users/" + myuid);
                     connection2 = (HttpURLConnection) url2.openConnection();
                     connection2.connect();
                     connection2.setConnectTimeout(5000);
@@ -309,7 +309,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                 BufferedReader reader3 = null;
                                 try {
 
-                                    URL url3 = new URL("http://10.4.41.143:3000/users/" + uid);
+                                    URL url3 = new URL("https://10.4.41.143:3001/users/" + uid);
                                     connection3 = (HttpURLConnection) url3.openConnection();
                                     connection3.connect();
                                     connection3.setConnectTimeout(5000);

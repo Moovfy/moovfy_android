@@ -129,7 +129,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
     private void updateList() {
         userList.clear();
         uids.clear();
-        String url = "http://10.4.41.143:3000/friends/";
+        String url = "https://10.4.41.143:3001/friends/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
             url += currentFirebaseUser.getUid();

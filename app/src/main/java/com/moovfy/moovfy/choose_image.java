@@ -139,7 +139,7 @@ public class choose_image extends AppCompatActivity {
                             Ref_uid1.setValue(uri.toString());
                             //acces api per guardar el avatar
                             queue = Volley.newRequestQueue(getApplicationContext());
-                            String url2 = "http://10.4.41.143:3000/users/updateavatar/" + uid;
+                            String url2 = "https://10.4.41.143:3001/users/updateavatar/" + uid;
                             JSONObject obj = new JSONObject();
                             try {
                                 obj.put("avatar", uri.toString());
