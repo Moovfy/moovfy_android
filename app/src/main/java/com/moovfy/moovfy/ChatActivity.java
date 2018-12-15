@@ -335,7 +335,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void AddFriends(String uid1,String uid2) {
 
-        String url = "http://10.4.41.143:3000/relations/add";
+        String url = "https://10.4.41.143:3001/relations/add";
 
 
         JSONObject json = new JSONObject();
@@ -378,7 +378,7 @@ public class ChatActivity extends AppCompatActivity {
 //!!!!!!!!!!!!!!!!!!!!!!!!
     private void RemoveFriends(String uid1,String uid2) {
 
-        String url = "http://10.4.41.143:3000/relations";
+        String url = "https://10.4.41.143:3001/relations";
         Log.d("inside remove:", url);
 
         JSONObject json = new JSONObject();
@@ -415,7 +415,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void AddFBlackList(String uid1, String uid2) {
-        String url = "http://10.4.41.143:3000/relations/block";
+        String url = "https://10.4.41.143:3001/relations/block";
 
 
         JSONObject json = new JSONObject();

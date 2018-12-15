@@ -328,7 +328,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void pasar_datos(JSONObject json) {
-        String url = "http://10.4.41.143:3000/users/register";
+        String url = "https://10.4.41.143:3001/users/register";
 
         JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
                 new Response.Listener<JSONObject>() {

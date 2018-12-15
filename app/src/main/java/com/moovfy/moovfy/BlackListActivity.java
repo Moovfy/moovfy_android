@@ -100,7 +100,7 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
     private void updateList() {
         userList.clear();
         uids.clear();
-        String url = "http://10.4.41.143:3000/blocked/";
+        String url = "https://10.4.41.143:3001/blocked/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
             url += currentFirebaseUser.getUid();
@@ -275,7 +275,7 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
                             e.printStackTrace();
                         }
                         Log.d("Unblocking:" , obj.toString());
-                        String url = "http://10.4.41.143:3000/relations/unblock";
+                        String url = "https://10.4.41.143:3001/relations/unblock";
 
                         JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url, obj,
                                 new Response.Listener<JSONObject>() {
