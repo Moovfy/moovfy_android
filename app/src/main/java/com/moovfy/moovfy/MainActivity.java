@@ -312,6 +312,11 @@ public class MainActivity extends AppCompatActivity
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String a = adapter.getItem(position);
+                System.out.println(a);
+                Intent i=new Intent(MainActivity.this, perfil.class);
+                i.putExtra("name_c",a);
+                startActivity(i);
 
             }
         });

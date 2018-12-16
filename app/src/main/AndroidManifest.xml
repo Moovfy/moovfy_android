@@ -86,6 +86,9 @@
         <activity
             android:name=".BlackListActivity"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".perfil"
+            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>
