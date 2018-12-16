@@ -287,7 +287,7 @@ public class ChatActivity extends AppCompatActivity {
         mMessageRecycler.scrollToPosition(mMessageAdapter.getItemCount()-1);
     }
 
-    @Override
+   /* @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) // Press Back Icon
         {
@@ -295,7 +295,7 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
 
     @Override

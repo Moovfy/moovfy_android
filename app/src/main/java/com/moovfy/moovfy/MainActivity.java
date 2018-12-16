@@ -439,7 +439,7 @@ public class MainActivity extends AppCompatActivity
                 String line = "";
 
                 while ((line = reader.readLine()) != null) {
-                    buffer.append(line+"\n");
+                    buffer.append(line + "\n");
                     Log.d("APIResponse: ", "> " + line);
                 }
 
@@ -464,13 +464,14 @@ public class MainActivity extends AppCompatActivity
             return null;
         }
 
+
         @Override
         protected void onPostExecute(String s) {
 
 
             ivImage = (ImageView) findViewById(R.id.profile_image);
             try {
-                if(s != null) {
+                if (s != null) {
                     JSONObject obj = new JSONObject(s);
                     GlideApp.with(getApplicationContext()).load(obj.getString("avatar")).into(ivImage);
                     TextView name = findViewById((R.id.username));
@@ -482,309 +483,309 @@ public class MainActivity extends AppCompatActivity
             }
 
         }
-
-                   
-
-  private void buscar(String s) {
-          String url = "https://10.4.41.143:3001/users/search/" + s;
-
-          JsonArrayRequest jsonobj = new JsonArrayRequest(Request.Method.GET, url,null,
-                  new Response.Listener<JSONArray>() {
-                      @Override
-                      public void onResponse(JSONArray response) {
-                          System.out.println(response.toString());
-                          Log.d("Respuesta", response.toString());
-                          adapter.clear();
-                          for (int i = 0; i < response.length(); ++i){
-                              try {
-                                  JSONObject objeto = response.getJSONObject(i);
-                                  String usr = objeto.getString("complete_name");
-
-
-                                  arrayList.add(usr);
-                                  adapter.notifyDataSetChanged();
-                                  setListViewHeightBasedOnItems(list);
-
-                                  System.out.println(usr);
-                              } catch (JSONException e) {
-                                  e.printStackTrace();
-                              }
-                          }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("Error.Response", error.toString());
-                    }
-                }
-                }
-        );
-        queue.add(jsonobj);
-
-    }
-
-    private void pasar_datos(JSONObject json) {
-        String url = "https://10.4.41.143:3001/locations/addLocation";
-
-        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url, json,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d("Response", response.toString());
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("Error.Response", error.toString());
-                    }
-                }
-        );
-        queue.add(jsonobj);
-
-
-
     }
 
 
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
+        private void buscar(String s) {
+            String url = "https://10.4.41.143:3001/users/search/" + s;
+
+            JsonArrayRequest jsonobj = new JsonArrayRequest(Request.Method.GET, url, null,
+                    new Response.Listener<JSONArray>() {
+                        @Override
+                        public void onResponse(JSONArray response) {
+                            System.out.println(response.toString());
+                            Log.d("Respuesta", response.toString());
+                            adapter.clear();
+                            for (int i = 0; i < response.length(); ++i) {
+                                try {
+                                    JSONObject objeto = response.getJSONObject(i);
+                                    String usr = objeto.getString("complete_name");
+
+
+                                    arrayList.add(usr);
+                                    adapter.notifyDataSetChanged();
+                                    setListViewHeightBasedOnItems(list);
+
+                                    System.out.println(usr);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d("Error.Response", error.toString());
+                        }
+                    }
+            );
+            queue.add(jsonobj);
+
         }
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-       // getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        private void pasar_datos(JSONObject json) {
+            String url = "https://10.4.41.143:3001/locations/addLocation";
+
+            JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url, json,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            Log.d("Response", response.toString());
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d("Error.Response", error.toString());
+                        }
+                    }
+            );
+            queue.add(jsonobj);
+
+
+        }
+
+
+        @Override
+        public void onBackPressed() {
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+            } else {
+                super.onBackPressed();
+            }
+        }
+
+        @Override
+        public boolean onCreateOptionsMenu(Menu menu) {
+            // Inflate the menu; this adds items to the action bar if it is present.
+            // getMenuInflater().inflate(R.menu.main, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            // Handle action bar item clicks here. The action bar will
+            // automatically handle clicks on the Home/Up button, so long
+            // as you specify a parent activity in AndroidManifest.xml.
+            int id = item.getItemId();
 /*
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
 */
-        return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_chat) {
-
-            Intent intent = new Intent(this, ChatsActivity.class);
-            startActivity(intent);
-            // Handle the camera action
-        } else if (id == R.id.nav_edit_profile) {
-
-            Intent intent = new Intent(this, EditProfile.class);
-            startActivity(intent);
-        } else if (id == R.id.nav_black_list) {
-           Intent intent = new Intent(this, BlackListActivity.class);
-           startActivity(intent);
-       } else if (id == R.id.nav_help) {
-
-            Intent intent = new Intent(this, HelpActivity.class);
-            startActivity(intent);
-
-        } else if (id == R.id.nav_logout) {
-            FirebaseAuth.getInstance().signOut();
-            getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit().putString("user_uid", "").commit();
-            Intent login = new Intent(getApplicationContext(), LoginActivity.class);
-            startActivity(login);
+            return super.onOptionsItemSelected(item);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-
-    //LOCATION FUNCTIONS
-    OnLocationUpdatedListener locationListener = new OnLocationUpdatedListener() {
+        @SuppressWarnings("StatementWithEmptyBody")
         @Override
-        public void onLocationUpdated(Location location) {
-            double lat = location.getLatitude();
-            double lng = location.getLongitude();
-            System.out.println("LOCATION CHANGED: latitude " + lat + " longitude " + lng);
-            Toast.makeText(getApplicationContext(),"LOCATION CHANGED: latitude " + lat + " longitude " + lng,Toast.LENGTH_LONG).show();
-            String firebase_uid = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user_uid","");
-            if(firebase_uid != "") {
-                FirebaseUser user = mAuth.getCurrentUser();
-                String userUid = user.getUid();
-                JSONObject json = new JSONObject();
-                try {
-                    json.put("userUID", userUid);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    json.put("latitude", location.getLatitude());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    json.put("longitude", location.getLongitude());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                pasar_datos(json);
-            }
-        }
-    };
+        public boolean onNavigationItemSelected(MenuItem item) {
+            // Handle navigation view item clicks here.
+            int id = item.getItemId();
 
-    Runnable locationRunnable = new Runnable(){
-        @Override
-        public void run() {
-            SmartLocation.with(getApplicationContext()).location().start(locationListener);
-        }
-    };
+            if (id == R.id.nav_chat) {
 
-    //callback method
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
-        switch (requestCode) {
-            case REQUEST_LOCATION:
-                switch (resultCode) {
-                    case Activity.RESULT_OK:
-                        // All required changes were successfully made
-                        Toast.makeText(getApplicationContext(), "Gps enabled", Toast.LENGTH_SHORT).show();
-                        break;
-                    case Activity.RESULT_CANCELED:
-                        // The user was asked to change settings, but chose not to
-                        Toast.makeText(getApplicationContext(), "Gps Canceled", Toast.LENGTH_SHORT).show();
-                        break;
-                    default:
-                        break;
-                }
-                break;
-        }
-    }
+                Intent intent = new Intent(this, ChatsActivity.class);
+                startActivity(intent);
+                // Handle the camera action
+            } else if (id == R.id.nav_edit_profile) {
 
+                Intent intent = new Intent(this, EditProfile.class);
+                startActivity(intent);
+            } else if (id == R.id.nav_black_list) {
+                Intent intent = new Intent(this, BlackListActivity.class);
+                startActivity(intent);
+            } else if (id == R.id.nav_help) {
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
+                Intent intent = new Intent(this, HelpActivity.class);
+                startActivity(intent);
 
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    @Override
-    public boolean onQueryTextSubmit(String s) {
-        buscar(s);
-        return true;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String s) {
-        buscar(s);
-        return true;
-    }
-
-    public boolean setListViewHeightBasedOnItems(ListView listView) {
-
-        ListAdapter listAdapter = listView.getAdapter();
-        if (listAdapter != null) {
-
-            int numberOfItems = listAdapter.getCount();
-
-            // Get total height of all items.
-            int totalItemsHeight = 0;
-
-            if (numberOfItems <= 10) {
-                for (int itemPos = 0; itemPos < numberOfItems; itemPos++) {
-                    View item = listAdapter.getView(itemPos, null, listView);
-                    float px = 500 * (listView.getResources().getDisplayMetrics().density);
-                    item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-                    totalItemsHeight += item.getMeasuredHeight();
-                }
-            }
-            else {
-                for (int itemPos = 0; itemPos < 10; itemPos++) {
-                    View item = listAdapter.getView(itemPos, null, listView);
-                    float px = 500 * (listView.getResources().getDisplayMetrics().density);
-                    item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-                    totalItemsHeight += item.getMeasuredHeight();
-                }
+            } else if (id == R.id.nav_logout) {
+                FirebaseAuth.getInstance().signOut();
+                getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit().putString("user_uid", "").commit();
+                Intent login = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(login);
             }
 
-
-            // Get total height of all item dividers.
-            int totalDividersHeight = listView.getDividerHeight() *
-                    (numberOfItems - 1);
-            // Get padding
-            int totalPadding = listView.getPaddingTop() + listView.getPaddingBottom();
-
-            // Set list height.
-            ViewGroup.LayoutParams params = listView.getLayoutParams();
-
-
-               params.height = totalItemsHeight + totalDividersHeight + totalPadding;
-
-
-            listView.setLayoutParams(params);
-            listView.requestLayout();
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
             return true;
+        }
 
-        } else {
+
+        //LOCATION FUNCTIONS
+        OnLocationUpdatedListener locationListener = new OnLocationUpdatedListener() {
+            @Override
+            public void onLocationUpdated(Location location) {
+                double lat = location.getLatitude();
+                double lng = location.getLongitude();
+                System.out.println("LOCATION CHANGED: latitude " + lat + " longitude " + lng);
+                Toast.makeText(getApplicationContext(), "LOCATION CHANGED: latitude " + lat + " longitude " + lng, Toast.LENGTH_LONG).show();
+                String firebase_uid = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user_uid", "");
+                if (firebase_uid != "") {
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    String userUid = user.getUid();
+                    JSONObject json = new JSONObject();
+                    try {
+                        json.put("userUID", userUid);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        json.put("latitude", location.getLatitude());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        json.put("longitude", location.getLongitude());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    pasar_datos(json);
+                }
+            }
+        };
+
+        Runnable locationRunnable = new Runnable() {
+            @Override
+            public void run() {
+                SmartLocation.with(getApplicationContext()).location().start(locationListener);
+            }
+        };
+
+        //callback method
+        @Override
+        protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+            final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
+            switch (requestCode) {
+                case REQUEST_LOCATION:
+                    switch (resultCode) {
+                        case Activity.RESULT_OK:
+                            // All required changes were successfully made
+                            Toast.makeText(getApplicationContext(), "Gps enabled", Toast.LENGTH_SHORT).show();
+                            break;
+                        case Activity.RESULT_CANCELED:
+                            // The user was asked to change settings, but chose not to
+                            Toast.makeText(getApplicationContext(), "Gps Canceled", Toast.LENGTH_SHORT).show();
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+            }
+        }
+
+
+        @Override
+        public void onConnected(@Nullable Bundle bundle) {
+
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+
+        }
+
+        @Override
+        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+        }
+
+        @Override
+        public boolean onQueryTextSubmit(String s) {
+            buscar(s);
+            return true;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String s) {
+            buscar(s);
+            return true;
+        }
+
+        public boolean setListViewHeightBasedOnItems(ListView listView) {
+
+            ListAdapter listAdapter = listView.getAdapter();
+            if (listAdapter != null) {
+
+                int numberOfItems = listAdapter.getCount();
+
+                // Get total height of all items.
+                int totalItemsHeight = 0;
+
+                if (numberOfItems <= 10) {
+                    for (int itemPos = 0; itemPos < numberOfItems; itemPos++) {
+                        View item = listAdapter.getView(itemPos, null, listView);
+                        float px = 500 * (listView.getResources().getDisplayMetrics().density);
+                        item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                        totalItemsHeight += item.getMeasuredHeight();
+                    }
+                } else {
+                    for (int itemPos = 0; itemPos < 10; itemPos++) {
+                        View item = listAdapter.getView(itemPos, null, listView);
+                        float px = 500 * (listView.getResources().getDisplayMetrics().density);
+                        item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                        totalItemsHeight += item.getMeasuredHeight();
+                    }
+                }
+
+
+                // Get total height of all item dividers.
+                int totalDividersHeight = listView.getDividerHeight() *
+                        (numberOfItems - 1);
+                // Get padding
+                int totalPadding = listView.getPaddingTop() + listView.getPaddingBottom();
+
+                // Set list height.
+                ViewGroup.LayoutParams params = listView.getLayoutParams();
+
+
+                params.height = totalItemsHeight + totalDividersHeight + totalPadding;
+
+
+                listView.setLayoutParams(params);
+                listView.requestLayout();
+                return true;
+
+            } else {
+                return false;
+            }
+
+        }
+
+
+        @Override
+        public boolean onClose() {
+            adapter.clear();
+            adapter.notifyDataSetChanged();
+            setListViewHeightBasedOnItems(list);
             return false;
         }
 
-    }
+        public void refreshToken() {
+            FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                @Override
+                public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                    if (!task.isSuccessful()) {
+                        Log.w("getInstanceIdFailed", "Failed", task.getException());
+                        return;
+                    }
 
+                    String token = task.getResult().getToken();
+                    Log.d("FIREBASE MESSAGING", "Refreshed token: " + token);
+                    DatabaseReference mDatabase;
+                    mDatabase = FirebaseDatabase.getInstance().getReference();
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    String userUid = user.getUid();
+                    mDatabase.child("users").child(userUid).child("token").setValue(token);
 
-    @Override
-    public boolean onClose() {
-        adapter.clear();
-        adapter.notifyDataSetChanged();
-        setListViewHeightBasedOnItems(list);
-        return false;
-    }
-    
-    public void refreshToken() {
-        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-            @Override
-            public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                if(!task.isSuccessful()){
-                    Log.w("getInstanceIdFailed","Failed",task.getException());
-                    return;
                 }
+            });
 
-                String token = task.getResult().getToken();
-                Log.d("FIREBASE MESSAGING", "Refreshed token: " + token);
-                DatabaseReference mDatabase;
-                mDatabase = FirebaseDatabase.getInstance().getReference();
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                String userUid = user.getUid();
-                mDatabase.child("users").child(userUid).child("token").setValue(token);
-
-            }
-        });
-
+        }
     }
 
-}
+

@@ -78,7 +78,6 @@
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".ChatActivity"
-            android:parentActivityName=".MainActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".MoovfyIntro"
@@ -89,7 +88,7 @@
         <activity
             android:name=".perfil"
             android:parentActivityName=".MainActivity" />
-    </application>
+
 
         <service android:name=".notifications.MoovfyNotificationService">
             <intent-filter>
@@ -109,6 +108,6 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_icono_notification"/>
-  </application>
+    </application>
 
 </manifest>
