@@ -1,5 +1,6 @@
 package com.moovfy.moovfy;
 
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,10 +20,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.kosalgeek.android.photoutil.ImageLoader;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.FileNotFoundException;
 
 public class perfil extends AppCompatActivity {
     TextView nam,use,ema;
@@ -52,7 +56,7 @@ public class perfil extends AppCompatActivity {
             }
             aux = na.substring(0,k);
 
-            String url = "http://10.4.41.143:3000/users/search/" + aux;
+            String url = "https://10.4.41.143:3001/users/search/" + aux;
 
             JsonArrayRequest jsonobj = new JsonArrayRequest(Request.Method.GET, url, null,
                     new Response.Listener<JSONArray>() {
@@ -60,40 +64,21 @@ public class perfil extends AppCompatActivity {
                         public void onResponse(JSONArray response) {
                             System.out.println(response.toString());
                             Log.d("Respuesta", response.toString());
-                            for (int i = 0; i < response.length(); ++i){
+                            //for (int i = 0; i < response.length(); ++i){
                                 try {
-                                    JSONObject objeto = response.getJSONObject(i);
+                                    JSONObject objeto = response.getJSONObject(0);
                                     nam.setText(objeto.getString("complete_name"));
                                     ema.setText(objeto.getString("email"));
                                     use.setText(objeto.getString("username"));
 
-                                    String uid = objeto.getString("firebase_uid");
-                                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
-                                    System.out.println(ref.toString());
-                                    ref.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            System.out.println("Hola");
-                                            User user =  dataSnapshot.getValue(User.class);
-
-
-                                            if(user != null) {
-                                                Glide.with(getApplicationContext()).load(user.getAvatar()).into(imag);
-
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                        }
-
-                                    });
+                                    String ava = objeto.getString("avatar");
+                                    System.out.println(ava);
+                                    Glide.with(perfil.this).load(ava).into(imag);
 
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
-                            }
+                            //}
 
                         }
                     },
