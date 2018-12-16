@@ -2,6 +2,7 @@ package com.moovfy.moovfy;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.SearchManager;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.IntentSender;
@@ -9,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -26,7 +28,12 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -41,6 +48,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
@@ -74,8 +82,15 @@ import com.moovfy.moovfy.security.NukeSSLCerts;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.ScrollView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -85,6 +100,9 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collections;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -105,13 +123,18 @@ import io.nlopez.smartlocation.location.utils.LocationState;
 import static java.lang.System.currentTimeMillis;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, SearchView.OnQueryTextListener, SearchView.OnCloseListener {
     private FirebaseAuth mAuth;
     private RequestQueue queue;
     private LocationGooglePlayServicesProvider provider;
     private final int REQUEST_PERMISSION_PHONE_STATE = 1;
     Button chan;
     final static int REQUEST_LOCATION = 199;
+    SearchView se;
+   ListView list;
+    ArrayList<String> arrayList;
+   ArrayAdapter<String> adapter;
+
 
     /*
      * Tabs
@@ -366,6 +389,27 @@ public class MainActivity extends AppCompatActivity
                 String url = "https://10.4.41.143:3001/users/" + currentUser.getUid();
                 JsonTask t = new JsonTask();
                 t.execute(url);
+                
+                list = (ListView) findViewById(R.id.listV);
+                arrayList = new ArrayList<String>();
+                adapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,arrayList);
+               list.setAdapter(adapter);
+                se = (SearchView) findViewById(R.id.searchView);
+                se.setOnQueryTextListener(this);
+                se.setOnCloseListener(this::onClose);
+                Toast.makeText(this,"h" , Toast.LENGTH_SHORT).show();
+
+                list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        String a = adapter.getItem(position);
+                        System.out.println(a);
+                        Intent i=new Intent(MainActivity.this, perfil.class);
+                        i.putExtra("name_c",a);
+                        startActivity(i);
+
+                    }
+                });
             }
 
         }
@@ -439,6 +483,43 @@ public class MainActivity extends AppCompatActivity
 
         }
 
+                   
+
+  private void buscar(String s) {
+          String url = "https://10.4.41.143:3001/users/search/" + s;
+
+          JsonArrayRequest jsonobj = new JsonArrayRequest(Request.Method.GET, url,null,
+                  new Response.Listener<JSONArray>() {
+                      @Override
+                      public void onResponse(JSONArray response) {
+                          System.out.println(response.toString());
+                          Log.d("Respuesta", response.toString());
+                          adapter.clear();
+                          for (int i = 0; i < response.length(); ++i){
+                              try {
+                                  JSONObject objeto = response.getJSONObject(i);
+                                  String usr = objeto.getString("complete_name");
+
+
+                                  arrayList.add(usr);
+                                  adapter.notifyDataSetChanged();
+                                  setListViewHeightBasedOnItems(list);
+
+                                  System.out.println(usr);
+                              } catch (JSONException e) {
+                                  e.printStackTrace();
+                              }
+                          }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Error.Response", error.toString());
+                    }
+                }
+                }
+        );
+        queue.add(jsonobj);
 
     }
 
@@ -612,6 +693,78 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        buscar(s);
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String s) {
+        buscar(s);
+        return true;
+    }
+
+    public boolean setListViewHeightBasedOnItems(ListView listView) {
+
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter != null) {
+
+            int numberOfItems = listAdapter.getCount();
+
+            // Get total height of all items.
+            int totalItemsHeight = 0;
+
+            if (numberOfItems <= 10) {
+                for (int itemPos = 0; itemPos < numberOfItems; itemPos++) {
+                    View item = listAdapter.getView(itemPos, null, listView);
+                    float px = 500 * (listView.getResources().getDisplayMetrics().density);
+                    item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                    totalItemsHeight += item.getMeasuredHeight();
+                }
+            }
+            else {
+                for (int itemPos = 0; itemPos < 10; itemPos++) {
+                    View item = listAdapter.getView(itemPos, null, listView);
+                    float px = 500 * (listView.getResources().getDisplayMetrics().density);
+                    item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                    totalItemsHeight += item.getMeasuredHeight();
+                }
+            }
+
+
+            // Get total height of all item dividers.
+            int totalDividersHeight = listView.getDividerHeight() *
+                    (numberOfItems - 1);
+            // Get padding
+            int totalPadding = listView.getPaddingTop() + listView.getPaddingBottom();
+
+            // Set list height.
+            ViewGroup.LayoutParams params = listView.getLayoutParams();
+
+
+               params.height = totalItemsHeight + totalDividersHeight + totalPadding;
+
+
+            listView.setLayoutParams(params);
+            listView.requestLayout();
+            return true;
+
+        } else {
+            return false;
+        }
+
+    }
+
+
+    @Override
+    public boolean onClose() {
+        adapter.clear();
+        adapter.notifyDataSetChanged();
+        setListViewHeightBasedOnItems(list);
+        return false;
+    }
+    
     public void refreshToken() {
         FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
             @Override
