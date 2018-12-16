@@ -397,7 +397,6 @@ public class MainActivity extends AppCompatActivity
                 se = (SearchView) findViewById(R.id.searchView);
                 se.setOnQueryTextListener(this);
                 se.setOnCloseListener(this::onClose);
-                Toast.makeText(this,"h" , Toast.LENGTH_SHORT).show();
 
                 list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
@@ -493,7 +492,6 @@ public class MainActivity extends AppCompatActivity
                     new Response.Listener<JSONArray>() {
                         @Override
                         public void onResponse(JSONArray response) {
-                            System.out.println(response.toString());
                             Log.d("Respuesta", response.toString());
                             adapter.clear();
                             for (int i = 0; i < response.length(); ++i) {
@@ -501,12 +499,10 @@ public class MainActivity extends AppCompatActivity
                                     JSONObject objeto = response.getJSONObject(i);
                                     String usr = objeto.getString("complete_name");
 
-
                                     arrayList.add(usr);
                                     adapter.notifyDataSetChanged();
                                     setListViewHeightBasedOnItems(list);
 
-                                    System.out.println(usr);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }

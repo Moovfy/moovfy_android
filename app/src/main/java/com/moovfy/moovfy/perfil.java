@@ -50,7 +50,7 @@ public class perfil extends AppCompatActivity {
         if (na != null) {
             String aux = null;
             int k = 0;
-            while (na.charAt(k) != (' '))
+            while (k < na.length() && na.charAt(k) != (' '))
             {
                 k++;
             }
@@ -63,8 +63,7 @@ public class perfil extends AppCompatActivity {
                         @Override
                         public void onResponse(JSONArray response) {
                             System.out.println(response.toString());
-                            Log.d("Respuesta", response.toString());
-                            //for (int i = 0; i < response.length(); ++i){
+
                                 try {
                                     JSONObject objeto = response.getJSONObject(0);
                                     nam.setText(objeto.getString("complete_name"));
@@ -72,13 +71,11 @@ public class perfil extends AppCompatActivity {
                                     use.setText(objeto.getString("username"));
 
                                     String ava = objeto.getString("avatar");
-                                    System.out.println(ava);
                                     Glide.with(perfil.this).load(ava).into(imag);
 
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
-                            //}
 
                         }
                     },
