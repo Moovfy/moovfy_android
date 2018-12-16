@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.Response.ErrorListener;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
@@ -123,30 +124,17 @@ public class Register extends AppCompatActivity {
 
                             try {
                                 json.put("email", email);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            try {
                                 json.put("complete_name", name);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            try {
                                 json.put("username", usern);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            try {
                                 json.put("firebase_uid", user.getUid());
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-
-                            pasar_datos(json);
+                            pasar_datos(json, user.getUid());
 
                             user.sendEmailVerification();
 
-                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                            /*UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                     .setPhotoUri(Uri.parse("C:\\Users\\Andoni\\Desktop\\Nueva carpeta (2)\\andoni\\moovfy_android-master\\moovfy_android-master\\app\\src\\main\\res\\drawable"))
                                     .build();
 
@@ -160,10 +148,7 @@ public class Register extends AppCompatActivity {
                                         }
                                     });
 
-
-                            getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putString("user_uid",user.getUid()).commit();
-                            Intent main = new Intent(getApplicationContext(),LoginActivity.class);
-                            startActivity(main);
+                            */
 
                         } else {
                             Log.w( "createUserWithEmail", task.getException());
@@ -175,27 +160,49 @@ public class Register extends AppCompatActivity {
 
     }
 
-    private void pasar_datos(JSONObject json) {
-        String url = "http://10.4.41.143:3000/users/register";
+    private void pasar_datos(JSONObject json, String uid) {
+        String url = "https://10.4.41.143:3001/users/register";
 
         JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
+                        Log.w("created", String.valueOf(response));
+                        //queue = Volley.newRequestQueue(getApplicationContext());
+                        String url2 = "https://10.4.41.143:3001/users/updateavatar/" + uid;
+                        JSONObject obj = new JSONObject();
+                        try {
+                            obj.put("avatar", "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        JsonObjectRequest jsonobj2 = new JsonObjectRequest(Request.Method.PUT, url2, obj,
+                                new Response.Listener<JSONObject>() {
+                                    @Override
+                                    public void onResponse(JSONObject response) {
+                                        Log.d("Response update iamge:", response.toString());
+                                    }
+                                },
+                                new ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        Log.d("Error.Response", error.toString());
+                                    }
+                                }
+                        );
+                        Intent main = new Intent(getApplicationContext(), LoginActivity.class);
+                        startActivity(main);
+                        queue.add(jsonobj2);
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
+                },new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.w("failed", String.valueOf(error));
+                        }
                 }
-        ){
 
-        };
+        );
         queue.add(jsonobj);
-
     }
 
 

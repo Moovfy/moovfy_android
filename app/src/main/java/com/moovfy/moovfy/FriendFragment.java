@@ -48,7 +48,8 @@ import org.json.JSONObject;
  * A simple {@link Fragment} subclass.
  */
 public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
-    public static final String EXTRA_MESSAGE = "";
+    public static final String EXTRA_MESSAGE = "uid";
+    public static final String RELATION = "relation";
     private RecyclerView recyclerListFriends;
     private ListFriendsAdapter adapter;
 
@@ -75,6 +76,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
             public void onItemClick(String uid) {
                 Log.d("UIDagafat: ", "> " + uid);
                 Intent intent = new Intent(getContext(), ChatActivity.class);
+                intent.putExtra(FriendFragment.RELATION, "ok");
                 intent.putExtra(EXTRA_MESSAGE, uid);
                 startActivity(intent);
             }
@@ -108,8 +110,10 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
+                    getActivity().sendBroadcast(new Intent("cargarFriends"));
                     mSwipeRefreshLayout.setRefreshing(true);
                     updateList();
+
                 }
             });
         }
@@ -125,7 +129,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
     private void updateList() {
         userList.clear();
         uids.clear();
-        String url = "http://10.4.41.143:3000/friends/";
+        String url = "https://10.4.41.143:3001/friends/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
             url += currentFirebaseUser.getUid();
@@ -296,7 +300,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<ListFriendsAdapter.ItemFri
         public void bind(final User user, String uid,final OnItemClickListener listener) {
             textViewUsername.setText(user.getName());
             textViewDesc.setText(user.getEmail());
-            GlideApp.with(mContext).load(user.getAvatar()).into(imageView);
+            GlideApp.with(mContext).load(user.getAvatar()).thumbnail(0.1f).into(imageView);
 
             itemView.setOnClickListener(new View.OnClickListener() {
 

@@ -5,7 +5,8 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_add_friend">Add to Friends</string>
+    <string name="action_add_blocked">Add to Black List</string>
     <string name="title_activity_login">Login</string>
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -32,4 +33,6 @@
 
 
     <string name="menu_refresh">Refresh</string>
+    <string name="default_notification_channel_id">moovfy_channel</string>
+
 </resources>

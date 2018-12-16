@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/selectableItemBackgroundBorderless"
     android:layout_width="fill_parent"
-    android:layout_height="?actionBarSize"
-    >
+    android:layout_height="?actionBarSize">
     <!-- android:background="?attr/selectableItemBackgroundBorderless" will cause this Custom View to make ripple effect -->
 
     <LinearLayout
@@ -32,6 +32,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
+        android:id="@+id/ll"
         android:layout_toRightOf="@id/conversation_image"
         android:orientation="vertical"
         android:paddingBottom="2.0dip"
@@ -56,4 +57,18 @@
 
 
     </LinearLayout>
+<!--
+    <ImageButton
+        android:id="@+id/addfriends"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:scaleType="fitCenter"
+        android:layout_marginHorizontal="10dp"
+        android:background="@drawable/ic_menu_invite"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="12dp"/>
+
+-->
+
 </RelativeLayout>

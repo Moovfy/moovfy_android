@@ -27,6 +27,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Authenticator;
+import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.Auth;
@@ -327,7 +328,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void pasar_datos(JSONObject json) {
-        String url = "http://10.4.41.143:3000/users/register";
+        String url = "https://10.4.41.143:3001/users/register";
 
         JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
                 new Response.Listener<JSONObject>() {
