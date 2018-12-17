@@ -388,7 +388,7 @@ public class ChatActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Added to Black List", Toast.LENGTH_LONG).show();
             AddFBlackList(uid1,uid2);
         }
-
+      
         if (item.getItemId() == android.R.id.home) // Press Back Icon
         {
             finish();
@@ -400,6 +400,18 @@ public class ChatActivity extends AppCompatActivity {
     private void setScrollbar(){
         mMessageRecycler.scrollToPosition(mMessageAdapter.getItemCount()-1);
     }
+
+   /* @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == android.R.id.home) // Press Back Icon
+        {
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }*/
+
 
 
 
