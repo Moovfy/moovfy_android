@@ -90,6 +90,11 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                 Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
                 intent.putExtra(RELATION, "donotshow");
                 intent.putExtra(EXTRA_MESSAGE, uid);
+                int idx = uids.indexOf(uid);
+
+                User u = userList.get(idx);
+                intent.putExtra("urlAvatar", u.getAvatar());
+                intent.putExtra("name", u.getName());
                 startActivity(intent);
             }
         });
@@ -174,6 +179,10 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         Log.d("ChatsOberts", dataSnapshot.toString());
+                        List<String> co = (List<String>) dataSnapshot.getValue();
+                        int index = co.indexOf(chatuid);
+                        co.remove(index);
+                        ref2.setValue(co);
                         /*
                         User user =  dataSnapshot.getValue(User.class);
                         int index = user.getChatsOberts().indexOf(chatuid);

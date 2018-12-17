@@ -61,6 +61,8 @@ import java.util.Random;
 public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     public static final String EXTRA_MESSAGE = "uid";
     public static final String RELATION = "relation";
+    private User me = new User();
+
     private RecyclerView recyclerListClose;
     private ListCloseAdapter adapter;
 
@@ -68,6 +70,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     List<String> uids = new ArrayList<>();
     List<String> friends = new ArrayList<>(); //lista dels uids dels friends
     private SwipeRefreshLayout mSwipeRefreshLayout;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -79,7 +82,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerListClose = (RecyclerView) layout.findViewById(R.id.recycleListClose);
         recyclerListClose.setLayoutManager(linearLayoutManager);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout1);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 /*
         Registrar_usuari_BD("homer@simpson.com", "homersimpson", "3","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Homer Simpson");
@@ -98,18 +101,16 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 } else {
                     intent.putExtra(CloseFragment.RELATION, "no");
                 }
+                int idx = uids.indexOf(uid);
+                User u = userList.get(idx);
+                intent.putExtra("urlAvatar", u.getAvatar());
+                intent.putExtra("name", u.getName());
+
                 startActivity(intent);
             }
         });
 
         recyclerListClose.setAdapter(adapter);
-
-        return layout;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
         mSwipeRefreshLayout.post(new Runnable() {
             @Override
             public void run() {
@@ -118,9 +119,10 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 updateList();
             }
         });
-
-
+        return layout;
     }
+
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -208,6 +210,21 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                     if (buffer.toString() != null) {
 
                         JSONArray jsonArray = new JSONArray(buffer.toString());
+
+                        //-------Buscar la info del propi usuari.
+                        JSONObject obj = new JSONObject();
+                        FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
+                        String current_uid = "";
+                        if (currentFirebaseUser != null) {
+                            current_uid = currentFirebaseUser.getUid();
+                        } else {
+                            Log.d("UIDNULL: ", "> " + "Usuari null");
+                        }
+                        obj.put("uid", current_uid);
+                        obj.put("relation", "myself");
+                        //-----------------------------------------------------
+
+                        jsonArray.put(obj);
                         if (jsonArray != null) {
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject e = jsonArray.getJSONObject(i);
@@ -238,15 +255,25 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                     }
 
                                     JSONObject jsonArrayUser = new JSONObject(buff.toString());
-                                    userList.add(new User(
-                                            jsonArrayUser.getString("email"),
-                                            jsonArrayUser.getString("username"),
-                                            jsonArrayUser.getString("avatar"),
-                                            jsonArrayUser.getString("complete_name")
-                                    ));
-                                    uids.add(uid);
+                                    if (!e.getString("relation").equals("myself")) {
 
-                                    adapter.notifyDataSetChanged();
+                                        userList.add(new User(
+                                                jsonArrayUser.getString("email"),
+                                                jsonArrayUser.getString("username"),
+                                                jsonArrayUser.getString("avatar"),
+                                                jsonArrayUser.getString("complete_name")
+                                        ));
+                                        uids.add(uid);
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                    else {
+                                        me = new User(
+                                                jsonArrayUser.getString("email"),
+                                                jsonArrayUser.getString("username"),
+                                                jsonArrayUser.getString("avatar"),
+                                                jsonArrayUser.getString("complete_name")
+                                        );
+                                    }
                                 } finally {
                                     if (con != null) {
                                         con.disconnect();

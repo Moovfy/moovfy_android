@@ -137,6 +137,10 @@ public class ChatActivity extends AppCompatActivity {
 
 
         updateUsers();
+        nomuser = (TextView) findViewById(R.id.action_bar_title_1);
+        nomuser.setText(intent.getStringExtra("name"));
+        fotousuari = (ImageView) findViewById(R.id.conversation_contact_photo);
+        Glide.with(getApplicationContext()).load(intent.getStringExtra("urlAvatar")).into(fotousuari);
 /*
         ValueEventListener usuari1Listener = new ValueEventListener() {
             @Override
@@ -317,10 +321,7 @@ public class ChatActivity extends AppCompatActivity {
                         jsonArrayUser.getString("avatar"),
                         jsonArrayUser.getString("complete_name")
                 );
-                nomuser = (TextView) findViewById(R.id.action_bar_title_1);
-                nomuser.setText(usuari2.getName());
-                fotousuari = (ImageView) findViewById(R.id.conversation_contact_photo);
-                Glide.with(getApplicationContext()).load(usuari2.getAvatar()).into(fotousuari);
+
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -357,6 +358,8 @@ public class ChatActivity extends AppCompatActivity {
             optionsMenu.getItem(0).setTitle("Delete Friend");
         } else if (relation.equals("donotshow")) {
             optionsMenu.removeItem(R.id.action_add);
+        } else {
+            optionsMenu.getItem(0).setTitle("Add to Friends");
         }
         return true;
     }

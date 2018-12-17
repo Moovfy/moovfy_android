@@ -67,7 +67,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerListFriends = (RecyclerView) layout.findViewById(R.id.recycleListFriends);
         recyclerListFriends.setLayoutManager(linearLayoutManager);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout2);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
 
@@ -78,23 +78,25 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                 Intent intent = new Intent(getContext(), ChatActivity.class);
                 intent.putExtra(FriendFragment.RELATION, "ok");
                 intent.putExtra(EXTRA_MESSAGE, uid);
+
+                int idx = uids.indexOf(uid);
+                User u = userList.get(idx);
+                intent.putExtra("urlAvatar", u.getAvatar());
+                intent.putExtra("name", u.getName());
+
                 startActivity(intent);
             }
         });
         recyclerListFriends.setAdapter(adapter);
-        return layout;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
         mSwipeRefreshLayout.post(new Runnable() {
             @Override
             public void run() {
                 mSwipeRefreshLayout.setRefreshing(true);
+                Log.d("AAAAAAAAAAAAAAAAA", "porque");
                 updateList();
             }
         });
+        return layout;
     }
 
     @Override
@@ -110,7 +112,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
-                    getActivity().sendBroadcast(new Intent("cargarFriends"));
+                    //getActivity().sendBroadcast(new Intent("cargarFriends"));
                     mSwipeRefreshLayout.setRefreshing(true);
                     updateList();
 
@@ -284,6 +286,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
             Log.d("UrlRequestedss: ", "> " + s);
             adapter.notifyDataSetChanged();
             mSwipeRefreshLayout.setRefreshing(false);
+            getActivity().sendBroadcast(new Intent("cargarFriends"));
 
         }
 
