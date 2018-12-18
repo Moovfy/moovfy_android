@@ -66,5 +66,16 @@
             android:textSize="24sp"
             android:textStyle="bold" />
 
+        <Button
+            android:id="@+id/addfri"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="80dp"
+            android:layout_weight="10"
+            android:layout_marginTop="40dp"
+            android:background="@color/primary"
+            android:text="Add Friend"
+            android:textColor="@color/white"/>
+
     </LinearLayout>
 </LinearLayout>

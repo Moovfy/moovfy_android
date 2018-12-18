@@ -18,13 +18,19 @@
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
            <android.support.v7.widget.SearchView
             android:id="@+id/searchView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:iconifiedByDefault="false"
             android:queryHint="Search"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+               android:layout_alignParentRight="true"/>
+            </RelativeLayout>
         </android.support.v7.widget.Toolbar>
 
 
