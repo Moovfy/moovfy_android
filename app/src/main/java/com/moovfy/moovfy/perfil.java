@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -13,8 +15,11 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,6 +36,7 @@ import java.io.FileNotFoundException;
 public class perfil extends AppCompatActivity {
     TextView nam,use,ema;
     ImageView imag;
+    Button fri;
     private RequestQueue queue;
 
     @Override
@@ -41,6 +47,7 @@ public class perfil extends AppCompatActivity {
         use = (TextView) findViewById(R.id.user_u);
         ema = (TextView) findViewById(R.id.email_u);
         imag = (ImageView) findViewById(R.id.image_per);
+        fri = (Button) findViewById(R.id.addfri);
         queue = Volley.newRequestQueue(perfil.this);
 
         Bundle bundle = getIntent().getExtras();
@@ -70,6 +77,17 @@ public class perfil extends AppCompatActivity {
                                     ema.setText(objeto.getString("email"));
                                     use.setText(objeto.getString("username"));
 
+                                    String idf = objeto.getString("_id");
+                                    fri.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                                            FirebaseUser currentUser = mAuth.getCurrentUser();
+
+                                            AddFriends(currentUser.getUid(),idf);
+                                        }
+                                    });
+
                                     String ava = objeto.getString("avatar");
                                     Glide.with(perfil.this).load(ava).into(imag);
 
@@ -89,5 +107,48 @@ public class perfil extends AppCompatActivity {
             queue.add(jsonobj);
 
         }
+    }
+
+    public void AddFriends(String uid1,String uid2) {
+
+        String url = "https://10.4.41.143:3001/relations/add";
+
+
+        JSONObject json = new JSONObject();
+
+        try {
+            json.put("firebase_uid1", uid1);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            json.put("firebase_uid2", uid2);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            json.put("status", "ok");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url,json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("Response add:", response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }
+        ){
+
+        };
+        queue.add(jsonobj);
+
     }
 }
