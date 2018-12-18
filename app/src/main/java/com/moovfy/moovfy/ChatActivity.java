@@ -412,10 +412,6 @@ public class ChatActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }*/
 
-    private void setScrollbar(){
-        mMessageRecycler.scrollToPosition(mMessageAdapter.getItemCount()-1);
-    }
-
 
 
     @Override

@@ -14,7 +14,6 @@ import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import com.google.maps.android.ui.IconGenerator;
-import com.moovfy.moovfy.GlideApp;
 import com.moovfy.moovfy.R;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
