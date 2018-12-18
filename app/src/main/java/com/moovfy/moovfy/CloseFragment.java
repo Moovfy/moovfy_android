@@ -69,7 +69,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     List<User> userList = new ArrayList<>();
     List<String> uids = new ArrayList<>();
     List<String> friends = new ArrayList<>(); //lista dels uids dels friends
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private SwipeRefreshLayout mSwipeRefreshLayout1;
 
 
     @Override
@@ -82,12 +82,12 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerListClose = (RecyclerView) layout.findViewById(R.id.recycleListClose);
         recyclerListClose.setLayoutManager(linearLayoutManager);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout1);
-        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout1 = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout1);
+        mSwipeRefreshLayout1.setOnRefreshListener(this);
 /*
-        Registrar_usuari_BD("homer@simpson.com", "homersimpson", "3","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Homer Simpson");
-        Registrar_usuari_BD("marge@simpson.com", "margesimpson", "4","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Marge Simpson");
-        Registrar_usuari_BD("vallsortizpol@gmail.com", "polvallsortiz", "sIGgaYLgSxSXUelMuj7KqLle6FX2","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Pol Valls");
+        Registrar_usuari_BD("homer@simpson.com", "homersimpson", "3","http://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Homer Simpson");
+        Registrar_usuari_BD("marge@simpson.com", "margesimpson", "4","http://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Marge Simpson");
+        Registrar_usuari_BD("vallsortizpol@gmail.com", "polvallsortiz", "sIGgaYLgSxSXUelMuj7KqLle6FX2","http://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Pol Valls");
 */
         adapter = new ListCloseAdapter(getContext(), userList,uids, new ListCloseAdapter.OnItemClickListener() {
             @Override
@@ -111,17 +111,17 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         });
 
         recyclerListClose.setAdapter(adapter);
-        mSwipeRefreshLayout.post(new Runnable() {
+        mSwipeRefreshLayout1.post(new Runnable() {
             @Override
             public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
+                mSwipeRefreshLayout1.setRefreshing(true);
                 Log.d("AAAAAAAAAAAAAAAAA", "porque");
                 updateList();
             }
         });
+        Log.d("Cargant:", "CloseFragment");
         return layout;
     }
-
 
 
     @Override
@@ -134,11 +134,11 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == R.id.menu_refresh) {
-            mSwipeRefreshLayout.post(new Runnable() {
+            mSwipeRefreshLayout1.post(new Runnable() {
                 @Override
                 public void run() {
 
-                    mSwipeRefreshLayout.setRefreshing(true);
+                    mSwipeRefreshLayout1.setRefreshing(true);
                     Log.d("aaaaaa222aa","manual refrehs");
                     updateList();
 
@@ -157,7 +157,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     private void updateList() {
         userList.clear();
         uids.clear();
-        String url = "https://10.4.41.143:3001/near/";
+        String url = "http://10.4.41.143:3000/near/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
             url += currentFirebaseUser.getUid();
@@ -188,8 +188,9 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             StringBuffer buffer = new StringBuffer();
             Log.d("Aquiiii22", "hol2a");
             try {
-                Log.d("Aquiiii22", "hola");
+
                 URL url = new URL(params[0]);
+                Log.d("URLCOnection", url.toString());
                 connection = (HttpURLConnection) url.openConnection();
 
                 connection.connect();
@@ -238,7 +239,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                 HttpURLConnection con = null;
                                 BufferedReader rd = null;
                                 try {
-                                    URL purl = new URL("https://10.4.41.143:3001/users/" + uid);
+                                    URL purl = new URL("http://10.4.41.143:3000/users/" + uid);
                                     con = (HttpURLConnection) purl.openConnection();
                                     StringBuffer buff = new StringBuffer();
                                     con.connect();
@@ -264,7 +265,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                                 jsonArrayUser.getString("complete_name")
                                         ));
                                         uids.add(uid);
-                                        adapter.notifyDataSetChanged();
+
                                     }
                                     else {
                                         me = new User(
@@ -366,7 +367,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             Log.d("UrlRequestedss: ", "> " + s);
             adapter.notifyDataSetChanged();
 
-            mSwipeRefreshLayout.setRefreshing(false);
+            mSwipeRefreshLayout1.setRefreshing(false);
 
             getActivity().sendBroadcast(new Intent("cargarNear"));
         }

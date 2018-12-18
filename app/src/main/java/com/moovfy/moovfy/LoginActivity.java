@@ -272,26 +272,33 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     JSONObject json = new JSONObject();
 
 
-                    DatabaseReference mDatabase;
-                    mDatabase = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
-                    mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot snapshot) {
-                            if (snapshot.child("avatar").exists()) {
+                    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                    FirebaseUser currentUser = mAuth.getCurrentUser();
+                    String uid = currentUser.getUid();
 
+                    queue = Volley.newRequestQueue(getApplicationContext());
+                    String url2 = "https://10.4.41.143:3001/users/updateavatar/" + uid;
+                    JSONObject obj = new JSONObject();
+                    try {
+                        obj.put("avatar", "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    JsonObjectRequest jsonobj2 = new JsonObjectRequest(Request.Method.PUT, url2, obj,
+                            new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    Log.d("Response", response.toString());
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d("Error.Response", error.toString());
+                                }
                             }
-                            else {
-                                String uri = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62";
-                                User usuari = new User(email,usern,uri,name);
-                                mDatabase.setValue(usuari);
-                            }
-                        }
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-                            Log.e("GoogleError: " ,"Error en login amb Google");
-                        }
-                    });
-
+                    );
+                    queue.add(jsonobj2);
 
                     try {
                         json.put("email", email);

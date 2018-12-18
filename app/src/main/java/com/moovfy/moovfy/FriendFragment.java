@@ -88,14 +88,9 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
             }
         });
         recyclerListFriends.setAdapter(adapter);
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
-                Log.d("AAAAAAAAAAAAAAAAA", "porque");
-                updateList();
-            }
-        });
+
+
+        Log.d("Cargant:", "FriendFragment");
         return layout;
     }
 
@@ -123,6 +118,8 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     }
 
+
+
     @Override
     public void onRefresh() {
         updateList();
@@ -131,7 +128,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
     private void updateList() {
         userList.clear();
         uids.clear();
-        String url = "https://10.4.41.143:3001/friends/";
+        String url = "http://10.4.41.143:3000/friends/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
             url += currentFirebaseUser.getUid();
@@ -178,7 +175,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                                 HttpURLConnection con = null;
                                 BufferedReader rd = null;
                                 try {
-                                    URL purl = new URL("https://10.4.41.143:3001/users/" + uid);
+                                    URL purl = new URL("http://10.4.41.143:3000/users/" + uid);
                                     con = (HttpURLConnection) purl.openConnection();
                                     StringBuffer buff = new StringBuffer();
                                     con.connect();
@@ -203,7 +200,6 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                                     ));
                                     uids.add(uid);
 
-                                    adapter.notifyDataSetChanged();
                                 } finally {
                                     if (con != null) {
                                         con.disconnect();

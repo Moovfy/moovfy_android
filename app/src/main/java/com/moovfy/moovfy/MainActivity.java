@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity
     Button chan;
     final static int REQUEST_LOCATION = 199;
 
+
     /*
      * Tabs
      * */
@@ -156,10 +157,10 @@ public class MainActivity extends AppCompatActivity
             else {
                 refreshToken();
 
-
+/*
                 //------------------------------------------------
                 //queue = Volley.newRequestQueue(getApplicationContext());
-                String url3 = "https://10.4.41.143:3001/users/updateavatar/8qZ0q11nqSZPjbBooJn02kdsF7Y2";
+                String url3 = "http://10.4.41.143:3000/users/updateavatar/Dsy9tIKKMsWeo3U41Msb230FtG72";
                 JSONObject obj = new JSONObject();
                 try {
                     obj.put("avatar", "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62");
@@ -182,6 +183,7 @@ public class MainActivity extends AppCompatActivity
                 );
                 queue.add(jsonobj);
                 //------------------------------------------
+                */
                 SmartLocation.with(getApplicationContext()).location().start(locationListener);
                 if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
                     GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
@@ -363,16 +365,21 @@ public class MainActivity extends AppCompatActivity
                 */
 
 
-                String url = "https://10.4.41.143:3001/users/" + currentUser.getUid();
-                JsonTask t = new JsonTask();
-                t.execute(url);
+
             }
 
         }
 
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        String url = "http://10.4.41.143:3000/users/" + currentUser.getUid();
+        JsonTask t = new JsonTask();
+        t.execute(url);
+    }
 
     private class JsonTask extends AsyncTask<String, String, String> {
 
@@ -411,6 +418,7 @@ public class MainActivity extends AppCompatActivity
                 }
                 try {
                     if (reader != null) {
+
                         reader.close();
                     }
                 } catch (IOException e) {
@@ -443,7 +451,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void pasar_datos(JSONObject json) {
-        String url = "https://10.4.41.143:3001/locations/addLocation";
+        String url = "http://10.4.41.143:3000/locations/addLocation";
 
         JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url, json,
                 new Response.Listener<JSONObject>() {

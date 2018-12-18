@@ -3,6 +3,7 @@ package com.moovfy.moovfy;
 import android.arch.persistence.room.Database;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
@@ -62,7 +63,7 @@ public class choose_image extends AppCompatActivity {
 
         cameraPhoto = new CameraPhoto(getApplicationContext());
         galleryPhoto = new GalleryPhoto(getApplicationContext());
-        ivImage = (ImageView) findViewById(R.id.profile_image);
+
 
         galeria = findViewById(R.id.galeria_b);
         camara = findViewById(R.id.camara_b);
@@ -83,13 +84,20 @@ public class choose_image extends AppCompatActivity {
             public void onClick(View v) {
                 /*Intent cam = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivity(cam);*/
-                try {
-                    startActivityForResult(cameraPhoto.takePhotoIntent(), Activity_cam);
-                cameraPhoto.addToGallery();
-            } catch (IOException e) {
+
+                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                        startActivityForResult(takePictureIntent, Activity_cam);
+                    }
+                    //startActivityForResult(cameraPhoto.takePhotoIntent(), Activity_cam);
+                //cameraPhoto.addToGallery();
+
+            /*
+            catch (IOException e) {
                 Toast.makeText(getApplicationContext(),
                         "Something Wrong while taking photos", Toast.LENGTH_SHORT).show();
             }
+            */
         }
          });
 
@@ -100,11 +108,13 @@ public class choose_image extends AppCompatActivity {
         if(resultCode == RESULT_OK){
             if(requestCode == Activity_cam){
                 String photoPath = cameraPhoto.getPhotoPath();
-
+                Log.d("PhotoPath", photoPath);
+                Log.d("Data", data.getData().toString());
                 Intent intent = new Intent(this, MainActivity.class);
                 intent.putExtra("path_photo", photoPath);
                 putImageInStorage(data);
-                startActivity(intent);
+                //finish();
+                //startActivity(intent);
 
             }
             else if(requestCode == Activity_select_image){
@@ -116,7 +126,8 @@ public class choose_image extends AppCompatActivity {
                 Intent intent = new Intent(this, MainActivity.class);
                 intent.putExtra("path_photo", photoPath);
                 putImageInStorage(data);
-                startActivity(intent);
+                //finish();
+                //startActivity(intent);
             }
         }
     }
@@ -131,6 +142,9 @@ public class choose_image extends AppCompatActivity {
                     storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                         @Override
                         public void onSuccess(Uri uri) {
+
+
+
                             FirebaseAuth mAuth = FirebaseAuth.getInstance();
                             FirebaseUser currentUser = mAuth.getCurrentUser();
                             String uid = currentUser.getUid();
@@ -139,8 +153,9 @@ public class choose_image extends AppCompatActivity {
                             Ref_uid1.setValue(uri.toString());
                             //acces api per guardar el avatar
                             queue = Volley.newRequestQueue(getApplicationContext());
-                            String url2 = "https://10.4.41.143:3001/users/updateavatar/" + uid;
+                            String url2 = "http://10.4.41.143:3000/users/updateavatar/" + uid;
                             JSONObject obj = new JSONObject();
+
                             try {
                                 obj.put("avatar", uri.toString());
                             } catch (JSONException e) {
@@ -160,6 +175,7 @@ public class choose_image extends AppCompatActivity {
                                         }
                                     }
                             );
+
                             queue.add(jsonobj2);
 
                         }

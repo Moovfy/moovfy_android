@@ -111,6 +111,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
     }
 
 
+
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
         if (viewHolder instanceof ListChatsAdapter.ItemChatViewHolder) {
@@ -157,6 +158,8 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
             });
         }
     }
+
+
 
     public void borrarDB(int deletedIndex, User deletedItem) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -279,7 +282,7 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                     for (String s : ids) {
                         if (!s.equals(currentuid)) {
 
-                            String url = "https://10.4.41.143:3001/users/" + s;
+                            String url = "http://10.4.41.143:3000/users/" + s;
                             uids.add(s);
                             String[] params = {url, chatid};
                             JsonTask t = new JsonTask();
