@@ -333,7 +333,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private void AddFriends(String uid1,String uid2) {
+    public void AddFriends(String uid1,String uid2) {
 
         String url = "https://10.4.41.143:3001/relations/add";
 
