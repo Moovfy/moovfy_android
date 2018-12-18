@@ -84,20 +84,13 @@ public class choose_image extends AppCompatActivity {
             public void onClick(View v) {
                 /*Intent cam = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivity(cam);*/
-
-                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                        startActivityForResult(takePictureIntent, Activity_cam);
-                    }
-                    //startActivityForResult(cameraPhoto.takePhotoIntent(), Activity_cam);
-                //cameraPhoto.addToGallery();
-
-            /*
-            catch (IOException e) {
+                try {
+                    startActivityForResult(cameraPhoto.takePhotoIntent(), Activity_cam);
+                    cameraPhoto.addToGallery();
+            } catch (IOException e) {
                 Toast.makeText(getApplicationContext(),
                         "Something Wrong while taking photos", Toast.LENGTH_SHORT).show();
             }
-            */
         }
          });
 

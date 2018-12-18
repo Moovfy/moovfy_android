@@ -43,6 +43,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.moovfy.moovfy.MessageListAdapter.formatDateTime;
 
@@ -446,6 +447,10 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                         for (DataSnapshot child : dataSnapshot.getChildren()){
 
                             mm = child.child("message").getValue().toString();
+                            String[] parts = mm.split(Pattern.quote("."));
+                           if (parts.length > 0 && parts[0].equals("https://firebasestorage")) {
+                               mm = "[Image]";
+                           }
                             time =  child.child("time").getValue().toString();
 
                         }

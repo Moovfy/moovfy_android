@@ -38,7 +38,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="0dp"
         android:layout_marginTop="83dp"
-        android:text="Moovfy es una red social para interactuar con gente a bordo del transporte público. Conoce a gente con tus mismos gustos y aficiones mientras te aburres en el tren, metro, autobús, etc...  Si quieres que no te molesten puedes hacerte invisible!!                                                                  Disfruta de Moovfy sin publicidad y gratis."
+        android:text="Moovfy es una red social para interactuar con gente a bordo del transporte público. Conoce a gente con tus mismos gustos y aficiones mientras te aburres en el tren, metro, autobús, etc...                                                                  Disfruta de Moovfy sin publicidad y gratis."
         android:textAlignment="textStart"
         android:textSize="14sp"
         android:textStyle="bold" />
