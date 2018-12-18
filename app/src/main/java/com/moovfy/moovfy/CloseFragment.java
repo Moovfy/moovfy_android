@@ -61,13 +61,16 @@ import java.util.Random;
 public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     public static final String EXTRA_MESSAGE = "uid";
     public static final String RELATION = "relation";
+    private User me = new User();
+
     private RecyclerView recyclerListClose;
     private ListCloseAdapter adapter;
 
     List<User> userList = new ArrayList<>();
     List<String> uids = new ArrayList<>();
     List<String> friends = new ArrayList<>(); //lista dels uids dels friends
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private SwipeRefreshLayout mSwipeRefreshLayout1;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -79,12 +82,12 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerListClose = (RecyclerView) layout.findViewById(R.id.recycleListClose);
         recyclerListClose.setLayoutManager(linearLayoutManager);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
-        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout1 = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout1);
+        mSwipeRefreshLayout1.setOnRefreshListener(this);
 /*
-        Registrar_usuari_BD("homer@simpson.com", "homersimpson", "3","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Homer Simpson");
-        Registrar_usuari_BD("marge@simpson.com", "margesimpson", "4","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Marge Simpson");
-        Registrar_usuari_BD("vallsortizpol@gmail.com", "polvallsortiz", "sIGgaYLgSxSXUelMuj7KqLle6FX2","https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Pol Valls");
+        Registrar_usuari_BD("homer@simpson.com", "homersimpson", "3","http://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Homer Simpson");
+        Registrar_usuari_BD("marge@simpson.com", "margesimpson", "4","http://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Marge Simpson");
+        Registrar_usuari_BD("vallsortizpol@gmail.com", "polvallsortiz", "sIGgaYLgSxSXUelMuj7KqLle6FX2","http://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62", "Pol Valls");
 */
         adapter = new ListCloseAdapter(getContext(), userList,uids, new ListCloseAdapter.OnItemClickListener() {
             @Override
@@ -98,28 +101,28 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 } else {
                     intent.putExtra(CloseFragment.RELATION, "no");
                 }
+                int idx = uids.indexOf(uid);
+                User u = userList.get(idx);
+                intent.putExtra("urlAvatar", u.getAvatar());
+                intent.putExtra("name", u.getName());
+
                 startActivity(intent);
             }
         });
 
         recyclerListClose.setAdapter(adapter);
-
-        return layout;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mSwipeRefreshLayout.post(new Runnable() {
+        mSwipeRefreshLayout1.post(new Runnable() {
             @Override
             public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
+                mSwipeRefreshLayout1.setRefreshing(true);
+                Log.d("AAAAAAAAAAAAAAAAA", "porque");
                 updateList();
             }
         });
-
-
+        Log.d("Cargant:", "CloseFragment");
+        return layout;
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -131,11 +134,12 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == R.id.menu_refresh) {
-            mSwipeRefreshLayout.post(new Runnable() {
+            mSwipeRefreshLayout1.post(new Runnable() {
                 @Override
                 public void run() {
-                    getActivity().sendBroadcast(new Intent("cargarNear"));
-                    mSwipeRefreshLayout.setRefreshing(true);
+
+                    mSwipeRefreshLayout1.setRefreshing(true);
+                    Log.d("aaaaaa222aa","manual refrehs");
                     updateList();
 
                 }
@@ -153,14 +157,14 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     private void updateList() {
         userList.clear();
         uids.clear();
-        String url = "https://10.4.41.143:3001/near/";
+        String url = "http://10.4.41.143:3000/near/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
             url += currentFirebaseUser.getUid();
         } else {
             Log.d("APIResponse3: ", "> " + "Usuari null");
         }
-        Log.d("UrlRequested: ", "> " + url);
+        Log.d("UrlRequested222aa: ", "> " + url);
         JsonTask t = new JsonTask();
         t.execute(url);
 
@@ -181,9 +185,12 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         protected String doInBackground(String... params) {
             HttpURLConnection connection = null;
             BufferedReader reader = null;
-
+            StringBuffer buffer = new StringBuffer();
+            Log.d("Aquiiii22", "hol2a");
             try {
+
                 URL url = new URL(params[0]);
+                Log.d("URLCOnection", url.toString());
                 connection = (HttpURLConnection) url.openConnection();
 
                 connection.connect();
@@ -192,17 +199,33 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
                 reader = new BufferedReader(new InputStreamReader(stream));
 
-                StringBuffer buffer = new StringBuffer();
+
                 String line = "";
 
                 while ((line = reader.readLine()) != null) {
                     buffer.append(line+"\n");
-                    Log.d("APIResponse: ", "> " + line);
+                    Log.d("Aquiiii22", "hola");
+                    Log.d("APIResponse222zzz: ", "> " + line);
                 }
                 try {
                     if (buffer.toString() != null) {
 
                         JSONArray jsonArray = new JSONArray(buffer.toString());
+
+                        //-------Buscar la info del propi usuari.
+                        JSONObject obj = new JSONObject();
+                        FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
+                        String current_uid = "";
+                        if (currentFirebaseUser != null) {
+                            current_uid = currentFirebaseUser.getUid();
+                        } else {
+                            Log.d("UIDNULL: ", "> " + "Usuari null");
+                        }
+                        obj.put("uid", current_uid);
+                        obj.put("relation", "myself");
+                        //-----------------------------------------------------
+
+                        jsonArray.put(obj);
                         if (jsonArray != null) {
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject e = jsonArray.getJSONObject(i);
@@ -213,6 +236,59 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                     friends.add(uid);
                                 }
 
+                                HttpURLConnection con = null;
+                                BufferedReader rd = null;
+                                try {
+                                    URL purl = new URL("http://10.4.41.143:3000/users/" + uid);
+                                    con = (HttpURLConnection) purl.openConnection();
+                                    StringBuffer buff = new StringBuffer();
+                                    con.connect();
+
+                                    InputStream strm = con.getInputStream();
+
+                                    rd = new BufferedReader(new InputStreamReader(strm));
+
+                                    String line2 = "";
+
+                                    while ((line2 = rd.readLine()) != null) {
+                                        buff.append(line2+"\n");
+                                        Log.d("APIResCloseList: ", "> " + line2);
+                                    }
+
+                                    JSONObject jsonArrayUser = new JSONObject(buff.toString());
+                                    if (!e.getString("relation").equals("myself")) {
+
+                                        userList.add(new User(
+                                                jsonArrayUser.getString("email"),
+                                                jsonArrayUser.getString("username"),
+                                                jsonArrayUser.getString("avatar"),
+                                                jsonArrayUser.getString("complete_name")
+                                        ));
+                                        uids.add(uid);
+
+                                    }
+                                    else {
+                                        me = new User(
+                                                jsonArrayUser.getString("email"),
+                                                jsonArrayUser.getString("username"),
+                                                jsonArrayUser.getString("avatar"),
+                                                jsonArrayUser.getString("complete_name")
+                                        );
+                                    }
+                                } finally {
+                                    if (con != null) {
+                                        con.disconnect();
+                                    }
+                                    try {
+                                        if (rd != null) {
+                                            rd.close();
+                                        }
+                                    } catch (IOException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+
+/*
                                     DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
                                     ref.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
@@ -238,8 +314,10 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                                 getActivity().sendBroadcast(ii);
                                                 */
                                                 //-------------------------------------
+                                /*
                                             }
                                             adapter.notifyDataSetChanged();
+                                            mSwipeRefreshLayout.setRefreshing(false);
 
                                         }
 
@@ -249,6 +327,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                         }
 
                                     });
+*/
 
                             }
                         }
@@ -261,12 +340,10 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 }
 
 
-
+                Log.d("BufferTo", buffer.toString());
                 return buffer.toString();
 
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 if (connection != null) {
@@ -280,15 +357,17 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                     e.printStackTrace();
                 }
             }
-            return null;
+            Log.d("BufferTo2", buffer.toString());
+            return buffer.toString();
         }
 
         @Override
         protected void onPostExecute(String s) {
-
+            Log.d("BufferTo233", s);
             Log.d("UrlRequestedss: ", "> " + s);
+            adapter.notifyDataSetChanged();
 
-            mSwipeRefreshLayout.setRefreshing(false);
+            mSwipeRefreshLayout1.setRefreshing(false);
 
             getActivity().sendBroadcast(new Intent("cargarNear"));
         }

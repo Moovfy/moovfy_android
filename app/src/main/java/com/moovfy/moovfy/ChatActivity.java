@@ -4,6 +4,7 @@ package com.moovfy.moovfy;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -43,9 +44,17 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -126,6 +135,13 @@ public class ChatActivity extends AppCompatActivity {
         mMessageRecycler.setLayoutManager(new LinearLayoutManager(this));
         mMessageRecycler.setAdapter(mMessageAdapter);
 
+
+        updateUsers();
+        nomuser = (TextView) findViewById(R.id.action_bar_title_1);
+        nomuser.setText(intent.getStringExtra("name"));
+        fotousuari = (ImageView) findViewById(R.id.conversation_contact_photo);
+        Glide.with(getApplicationContext()).load(intent.getStringExtra("urlAvatar")).into(fotousuari);
+/*
         ValueEventListener usuari1Listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -159,7 +175,7 @@ public class ChatActivity extends AppCompatActivity {
         };
 
         Ref_uid2.addValueEventListener(usuari2Listener);
-
+*/
         btnEnviar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -243,6 +259,97 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    public void updateUsers() {
+        String url = "https://10.4.41.143:3001/users/";
+        JsonTask t = new JsonTask();
+        t.execute(url);
+    }
+
+    private class JsonTask extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            HttpURLConnection con = null;
+            BufferedReader rd = null;
+            try {
+                URL purl = new URL(params[0] + uid1);
+                con = (HttpURLConnection) purl.openConnection();
+                StringBuffer buff = new StringBuffer();
+                con.connect();
+
+                InputStream strm = con.getInputStream();
+
+                rd = new BufferedReader(new InputStreamReader(strm));
+
+                String line2 = "";
+
+                while ((line2 = rd.readLine()) != null) {
+                    buff.append(line2+"\n");
+                    Log.d("APIResCloseList: ", "> " + line2);
+                }
+
+                JSONObject jsonArrayUser = new JSONObject(buff.toString());
+                usuari1 = new User(
+                        jsonArrayUser.getString("email"),
+                        jsonArrayUser.getString("username"),
+                        jsonArrayUser.getString("avatar"),
+                        jsonArrayUser.getString("complete_name")
+                );
+
+
+
+                purl = new URL(params[0] + uid2);
+                con = (HttpURLConnection) purl.openConnection();
+                buff = new StringBuffer();
+                con.connect();
+
+                strm = con.getInputStream();
+
+                rd = new BufferedReader(new InputStreamReader(strm));
+
+                line2 = "";
+
+                while ((line2 = rd.readLine()) != null) {
+                    buff.append(line2+"\n");
+                    Log.d("APIResCloseList: ", "> " + line2);
+                }
+
+                jsonArrayUser = new JSONObject(buff.toString());
+                usuari2 = new User(
+                        jsonArrayUser.getString("email"),
+                        jsonArrayUser.getString("username"),
+                        jsonArrayUser.getString("avatar"),
+                        jsonArrayUser.getString("complete_name")
+                );
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            finally {
+                if (con != null) {
+                    con.disconnect();
+                }
+                try {
+                    if (rd != null) {
+                        rd.close();
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            return "";
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+        }
+
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
@@ -251,6 +358,8 @@ public class ChatActivity extends AppCompatActivity {
             optionsMenu.getItem(0).setTitle("Delete Friend");
         } else if (relation.equals("donotshow")) {
             optionsMenu.removeItem(R.id.action_add);
+        } else {
+            optionsMenu.getItem(0).setTitle("Add to Friends");
         }
         return true;
     }
@@ -279,6 +388,11 @@ public class ChatActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Added to Black List", Toast.LENGTH_LONG).show();
             AddFBlackList(uid1,uid2);
         }
+      
+        if (item.getItemId() == android.R.id.home) // Press Back Icon
+        {
+            finish();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -289,6 +403,7 @@ public class ChatActivity extends AppCompatActivity {
 
    /* @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         if (item.getItemId() == android.R.id.home) // Press Back Icon
         {
             finish();
@@ -296,6 +411,11 @@ public class ChatActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }*/
+
+    private void setScrollbar(){
+        mMessageRecycler.scrollToPosition(mMessageAdapter.getItemCount()-1);
+    }
+
 
 
     @Override

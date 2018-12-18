@@ -67,7 +67,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerListFriends = (RecyclerView) layout.findViewById(R.id.recycleListFriends);
         recyclerListFriends.setLayoutManager(linearLayoutManager);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout2);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
 
@@ -78,23 +78,20 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                 Intent intent = new Intent(getContext(), ChatActivity.class);
                 intent.putExtra(FriendFragment.RELATION, "ok");
                 intent.putExtra(EXTRA_MESSAGE, uid);
+
+                int idx = uids.indexOf(uid);
+                User u = userList.get(idx);
+                intent.putExtra("urlAvatar", u.getAvatar());
+                intent.putExtra("name", u.getName());
+
                 startActivity(intent);
             }
         });
         recyclerListFriends.setAdapter(adapter);
-        return layout;
-    }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
-                updateList();
-            }
-        });
+
+        Log.d("Cargant:", "FriendFragment");
+        return layout;
     }
 
     @Override
@@ -110,7 +107,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
-                    getActivity().sendBroadcast(new Intent("cargarFriends"));
+                    //getActivity().sendBroadcast(new Intent("cargarFriends"));
                     mSwipeRefreshLayout.setRefreshing(true);
                     updateList();
 
@@ -121,6 +118,8 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     }
 
+
+
     @Override
     public void onRefresh() {
         updateList();
@@ -129,7 +128,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
     private void updateList() {
         userList.clear();
         uids.clear();
-        String url = "https://10.4.41.143:3001/friends/";
+        String url = "http://10.4.41.143:3000/friends/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
             url += currentFirebaseUser.getUid();
@@ -162,7 +161,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
                 while ((line = reader.readLine()) != null) {
                     buffer.append(line+"\n");
-                    Log.d("APIResponse: ", "> " + line);
+                    Log.d("APIResponse22222xx: ", "> " + line);
                 }
                 try {
                     if (buffer.toString() != null) {
@@ -173,7 +172,48 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                                 JSONObject e = jsonArray.getJSONObject(i);
                                 String uid = e.getString("uid");
 
+                                HttpURLConnection con = null;
+                                BufferedReader rd = null;
+                                try {
+                                    URL purl = new URL("http://10.4.41.143:3000/users/" + uid);
+                                    con = (HttpURLConnection) purl.openConnection();
+                                    StringBuffer buff = new StringBuffer();
+                                    con.connect();
 
+                                    InputStream strm = con.getInputStream();
+
+                                    rd = new BufferedReader(new InputStreamReader(strm));
+
+                                    String line2 = "";
+
+                                    while ((line2 = rd.readLine()) != null) {
+                                        buff.append(line2+"\n");
+                                        Log.d("APIResCloseList: ", "> " + line2);
+                                    }
+
+                                    JSONObject jsonArrayUser = new JSONObject(buff.toString());
+                                    userList.add(new User(
+                                            jsonArrayUser.getString("email"),
+                                            jsonArrayUser.getString("username"),
+                                            jsonArrayUser.getString("avatar"),
+                                            jsonArrayUser.getString("complete_name")
+                                    ));
+                                    uids.add(uid);
+
+                                } finally {
+                                    if (con != null) {
+                                        con.disconnect();
+                                    }
+                                    try {
+                                        if (rd != null) {
+                                            rd.close();
+                                        }
+                                    } catch (IOException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+
+/*
                                 DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
                                 ref.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
@@ -191,6 +231,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                                             uids.add(uid);
                                         }
                                         adapter.notifyDataSetChanged();
+                                        mSwipeRefreshLayout.setRefreshing(false);
 
                                     }
 
@@ -200,7 +241,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                                     }
 
                                 });
-
+*/
                             }
                         }
 
@@ -239,7 +280,9 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
         protected void onPostExecute(String s) {
 
             Log.d("UrlRequestedss: ", "> " + s);
+            adapter.notifyDataSetChanged();
             mSwipeRefreshLayout.setRefreshing(false);
+            getActivity().sendBroadcast(new Intent("cargarFriends"));
 
         }
 

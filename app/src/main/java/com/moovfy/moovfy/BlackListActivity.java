@@ -100,7 +100,7 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
     private void updateList() {
         userList.clear();
         uids.clear();
-        String url = "https://10.4.41.143:3001/blocked/";
+        String url = "http://10.4.41.143:3000/blocked/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
             url += currentFirebaseUser.getUid();
@@ -153,30 +153,48 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
                                 JSONObject e = jsonArray.getJSONObject(i);
                                 String uid = e.getString("firebase_uid");
 
-                                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
-                                ref.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        User user =  dataSnapshot.getValue(User.class);
+                                HttpURLConnection con = null;
+                                BufferedReader rd = null;
+                                try {
+                                    URL purl = new URL("http://10.4.41.143:3000/users/" + uid);
+                                    con = (HttpURLConnection) purl.openConnection();
+                                    StringBuffer buff = new StringBuffer();
+                                    con.connect();
 
-                                        userList.add(new User(
-                                                user.getEmail(),
-                                                user.getUsername(),
-                                                user.getAvatar(),
-                                                user.getName()
-                                        ));
-                                        uids.add(uid);
-                                        adapter.notifyDataSetChanged();
+                                    InputStream strm = con.getInputStream();
 
-                                        mSwipeRefreshLayout.setRefreshing(false);
+                                    rd = new BufferedReader(new InputStreamReader(strm));
+
+                                    String line2 = "";
+
+                                    while ((line2 = rd.readLine()) != null) {
+                                        buff.append(line2+"\n");
+                                        Log.d("APIResCloseList: ", "> " + line2);
                                     }
 
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                                    JSONObject jsonArrayUser = new JSONObject(buff.toString());
+                                    userList.add(new User(
+                                            jsonArrayUser.getString("email"),
+                                            jsonArrayUser.getString("username"),
+                                            jsonArrayUser.getString("avatar"),
+                                            jsonArrayUser.getString("complete_name")
+                                    ));
+                                    uids.add(uid);
 
+
+                                } finally {
+                                    if (con != null) {
+                                        con.disconnect();
                                     }
+                                    try {
+                                        if (rd != null) {
+                                            rd.close();
+                                        }
+                                    } catch (IOException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
 
-                                });
 
 
                             }
@@ -216,7 +234,7 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
         protected void onPostExecute(String s) {
 
             Log.d("UrlRequestedss: ", "> " + s);
-
+            adapter.notifyDataSetChanged();
             mSwipeRefreshLayout.setRefreshing(false);
 
         }
@@ -275,7 +293,7 @@ public class BlackListActivity extends AppCompatActivity implements RecyclerItem
                             e.printStackTrace();
                         }
                         Log.d("Unblocking:" , obj.toString());
-                        String url = "https://10.4.41.143:3001/relations/unblock";
+                        String url = "http://10.4.41.143:3000/relations/unblock";
 
                         JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url, obj,
                                 new Response.Listener<JSONObject>() {

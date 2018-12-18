@@ -47,11 +47,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Random;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     GoogleMap mGoogleMap;
     MapView mMapView;
     View mView;
+
+    String mylat = "";
+    String mylng = "";
 
     private LatLngBounds mMapBoundary;
     private MyClusterManagerRenderer mClusterManagerRenderer;
@@ -85,79 +90,51 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             mMapView.onResume();
             mMapView.getMapAsync(this);
         }
-        mReceiver = new BroadcastReceiver() {
 
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String uid = "";
-                FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
-                if (currentFirebaseUser != null) {
-                    uid = currentFirebaseUser.getUid();
-                } else {
-                    Log.d("APIResponse3: ", "> " + "Usuari null");
-                }
 
-                if ("cargarNear".equals(intent.getAction())) {
-
-                    String url = "https://10.4.41.143:3001/near/" + uid;
-                    JsonTaskUpdateMap t = new JsonTaskUpdateMap();
-                    t.execute(url);
-                    Log.d("NEEEEARRR", "NEAR");
-
-                }
-                /*
-                else if ("cargarFriends".equals(intent.getAction())) {
-                    Log.d("FFFFFFFFFFFFFFFFFFFF", "friends");
-                    String url = "https://10.4.41.143:3001/friends/" + uid;
-                    JsonTaskUpdateMap t = new JsonTaskUpdateMap();
-                    //t.execute(url);
-                }
-                */
-            }
-        };
-        mReceiver2 = new BroadcastReceiver() {
-
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String uid = "";
-                FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
-                if (currentFirebaseUser != null) {
-                    uid = currentFirebaseUser.getUid();
-                } else {
-                    Log.d("APIResponse3: ", "> " + "Usuari null");
-                }
-
-                if ("cargarFriends".equals(intent.getAction())) {
-                    Log.d("ExecutantFriends: ", "> " + "Usuari null");
-                    String url = "https://10.4.41.143:3001/friends/" + uid;
-                    JsonTaskUpdateMap t = new JsonTaskUpdateMap();
-                    t.execute(url);
-
-                }
-                /*
-                else if ("cargarFriends".equals(intent.getAction())) {
-                    Log.d("FFFFFFFFFFFFFFFFFFFF", "friends");
-                    String url = "https://10.4.41.143:3001/friends/" + uid;
-                    JsonTaskUpdateMap t = new JsonTaskUpdateMap();
-                    //t.execute(url);
-                }
-                */
-            }
-        };
-
-        IntentFilter filter2 = new IntentFilter("cargarFriends");
-        IntentFilter filter3 = new IntentFilter("cargarNear");
-
-        getContext().registerReceiver(mReceiver,filter3);
-        getContext().registerReceiver(mReceiver2,filter2);
 
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String uid = "";
+                FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
+                if (currentFirebaseUser != null) {
+                    uid = currentFirebaseUser.getUid();
+                    if ("cargarNear".equals(intent.getAction())) {
+
+                        String url = "http://10.4.41.143:3000/near/" + uid;
+                        JsonTaskUpdateMap t = new JsonTaskUpdateMap();
+                        t.execute(url);
+                    }
+
+                    if ("cargarFriends".equals(intent.getAction())) {
+
+                        String url = "http://10.4.41.143:3000/friends/" + uid;
+                        JsonTaskUpdateMap t = new JsonTaskUpdateMap();
+                        t.execute(url);
+                    }
+                }
+
+            }
+        };
+
+        IntentFilter filter = new IntentFilter("cargarFriends");
+        filter.addAction("cargarNear");
+        getContext().registerReceiver(mReceiver,filter);
+    }
+
+
+
+    @Override
     public void onStop() {
-        getContext().unregisterReceiver(mReceiver);
-        getContext().unregisterReceiver(mReceiver2);
+
         super.onStop();
+        getContext().unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -169,7 +146,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         addMapMarkers();
         mGoogleMap.getUiSettings().setAllGesturesEnabled(false);
         mGoogleMap.getUiSettings().setZoomGesturesEnabled(true);
-
 
     }
 
@@ -197,7 +173,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             } else {
                 Log.d("APIResponse3: ", "> " + "Usuari null");
             }
-            String url = "https://10.4.41.143:3001/near/" + uid;
+            String url = "http://10.4.41.143:3000/near/" + uid;
             JsonTaskUpdateMap t = new JsonTaskUpdateMap();
             t.execute(url);
 */
@@ -211,8 +187,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         protected String doInBackground(String... params) {
 
             mClusterManager.clearItems();
-            String mylat = "";
-            String mylng = "";
+
 
             HttpURLConnection connection = null;
             BufferedReader reader = null;
@@ -247,7 +222,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     }
 
 
-                    URL url2 = new URL("https://10.4.41.143:3001/users/" + myuid);
+                    URL url2 = new URL("http://10.4.41.143:3000/users/" + myuid);
                     connection2 = (HttpURLConnection) url2.openConnection();
                     connection2.connect();
                     connection2.setConnectTimeout(5000);
@@ -277,7 +252,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         LatLng myposition = new LatLng(lat, lng);
                         //LatLng position = new LatLng(41.7164, 1.8223);
 
-                        String avatar = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62"; // set the default avatar
+                        String avatar = "http://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62"; // set the default avatar
                         if (myuser.getString("avatar") != null) {
                             Log.d("acces url", myuser.getString("avatar"));
                             avatar = myuser.getString("avatar");
@@ -309,7 +284,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                 BufferedReader reader3 = null;
                                 try {
 
-                                    URL url3 = new URL("https://10.4.41.143:3001/users/" + uid);
+                                    URL url3 = new URL("http://10.4.41.143:3000/users/" + uid);
                                     connection3 = (HttpURLConnection) url3.openConnection();
                                     connection3.connect();
                                     connection3.setConnectTimeout(5000);
@@ -338,7 +313,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                         //LatLng position = new LatLng(41.7164, 1.8223);
 
                                         Log.d("avatarde", newuser.getString("username"));
-                                        String avatar = "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62"; // set the default avatar
+                                        String avatar = "http://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62"; // set the default avatar
                                         if (newuser.getString("avatar") != null) {
                                             avatar = newuser.getString("avatar");
                                         }
@@ -360,12 +335,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
 
                                 } finally {
-                                    if (connection2 != null) {
-                                        connection2.disconnect();
+                                    if (connection3 != null) {
+                                        connection3.disconnect();
                                     }
                                     try {
-                                        if (reader2 != null) {
-                                            reader2.close();
+                                        if (reader3 != null) {
+                                            reader3.close();
                                         }
                                     } catch (IOException e2) {
                                         e2.printStackTrace();
@@ -399,7 +374,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
 
 
-
+                Log.d("POSREAL", mylat + mylng);
                 return mylat + "|" + mylng;
 
             } catch (MalformedURLException e) {
@@ -418,18 +393,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     e.printStackTrace();
                 }
             }
-            return null;
+            Log.d("BUIT", mylat + mylng);
+            return mylat + "|" + mylng;
         }
 
         @Override
         protected void onPostExecute(String s) {
 
-            Log.d("UrlRequestedss: ", "> " + s);
-            mClusterManager.cluster();
+            if (!s.equals("|")) {
+                Log.d("UrlRequestedss: ", "> " + s);
+                mClusterManager.cluster();
+                getActivity().getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putString("last",s).commit();
 
-            String latlng[] = s.split("\\|");
-            LatLng position = new LatLng(Double.parseDouble(latlng[0]), Double.parseDouble(latlng[1]));
-            mGoogleMap.moveCamera( CameraUpdateFactory.newLatLngZoom(position, 18.0f) );
+            }
+            String last = getActivity().getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("last", "");
+            if (!last.equals("")) {
+                String[] latlng = last.split("\\|");
+                LatLng position = new LatLng(Double.parseDouble(latlng[0]), Double.parseDouble(latlng[1]));
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16.0f));
+            }
+
 
         }
 

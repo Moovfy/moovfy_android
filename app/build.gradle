@@ -66,6 +66,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:16.0.5'
     implementation 'com.google.firebase:firebase-core:16.0.5'
 
+    implementation 'com.google.firebase:firebase-messaging:17.3.4'
+  
 
     implementation 'com.github.bumptech.glide:glide:4.7.1'
 
@@ -75,7 +77,7 @@ dependencies {
 
 
     annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
-    implementation 'com.google.firebase:firebase-messaging:17.3.1'
+ 
 
 
     //Image GIF
