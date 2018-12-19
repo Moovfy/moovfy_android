@@ -403,12 +403,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             if (!s.equals("|")) {
                 Log.d("UrlRequestedss: ", "> " + s);
                 mClusterManager.cluster();
-                getActivity().getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putString("last",s).commit();
-
             }
-            String last = getActivity().getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("last", "");
-            if (!last.equals("")) {
-                String[] latlng = last.split("\\|");
+            if (!s.equals("")) {
+                String[] latlng = s.split("\\|");
                 LatLng position = new LatLng(Double.parseDouble(latlng[0]), Double.parseDouble(latlng[1]));
                 mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 16.0f));
             }

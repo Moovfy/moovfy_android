@@ -452,15 +452,15 @@ public class ChatsActivity extends AppCompatActivity implements RecyclerItemTouc
                                mm = "[Image]";
                            }
                             time =  child.child("time").getValue().toString();
+                            u.setEmail(mm); //ultim missatge guardat en el email
+                            u.setDesc(time);
 
+                            userList.add(u);
+
+                            adapter.notifyDataSetChanged();
+                            mSwipeRefreshLayout.setRefreshing(false);
                         }
-                        u.setEmail(mm); //ultim missatge guardat en el email
-                        u.setDesc(time);
 
-                        userList.add(u);
-
-                        adapter.notifyDataSetChanged();
-                        mSwipeRefreshLayout.setRefreshing(false);
 
                     }
 

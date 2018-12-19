@@ -147,7 +147,10 @@ public class MainActivity extends AppCompatActivity
     TabItem tabFriend;
     //----------------------
 
+    //HEADER VIEW Variables
     ImageView ivImage; // avatar
+    TextView name; //Complete name
+    TextView correo;
     DatabaseReference Ref_uid1;
 
 
@@ -178,89 +181,20 @@ public class MainActivity extends AppCompatActivity
                 startActivity(login);
             }
             else {
-                refreshToken();
-
-/*
-                //------------------------------------------------
-                //queue = Volley.newRequestQueue(getApplicationContext());
-                String url3 = "http://10.4.41.143:3000/users/updateavatar/Dsy9tIKKMsWeo3U41Msb230FtG72";
-                JSONObject obj = new JSONObject();
-                try {
-                    obj.put("avatar", "https://firebasestorage.googleapis.com/v0/b/moovfy.appspot.com/o/default-avatar-2.jpg?alt=media&token=fb78f411-b713-4365-9514-d82e6725cb62");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url3, obj,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                Log.d("Response", response.toString());
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Log.d("Error.Response", error.toString());
-                            }
-                        }
-                );
-                queue.add(jsonobj);
-                //------------------------------------------
-                */
-                SmartLocation.with(getApplicationContext()).location().start(locationListener);
-                if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
-                    GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
-                            .addApi(LocationServices.API)
-                            .addConnectionCallbacks(this)
-                            .addOnConnectionFailedListener(this).build();
-                    googleApiClient.connect();
-
-                    LocationRequest locationRequest = LocationRequest.create();
-                    locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                    locationRequest.setInterval(5 * 1000);
-                    locationRequest.setFastestInterval(2 * 1000);
-                    LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                            .addLocationRequest(locationRequest);
-
-                    //**************************
-                    builder.setAlwaysShow(true); //this is the key ingredient
-                    //**************************
-
-                    PendingResult<LocationSettingsResult> result =
-                            LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
-                    result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-                        @Override
-                        public void onResult(@NonNull LocationSettingsResult result) {
-                            final Status status = result.getStatus();
-//                final LocationSettingsStates state = result.getLocationSettingsStates();
-
-                            switch (status.getStatusCode()) {
-                                case LocationSettingsStatusCodes.SUCCESS:
-
-
-                                    break;
-                                case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                                    // Location settings are not satisfied. But could be fixed by showing the user
-                                    // a dialog.
-                                    // Show the dialog by calling startResolutionForResult(),
-                                    // and check the result in onActivityResult().
-                                    try {
-
-                                        status.startResolutionForResult(MainActivity.this, REQUEST_LOCATION);
-                                    } catch (IntentSender.SendIntentException e) {
-
-                                    }
-                                    break;
-                                case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                                    break;
-                            }
-                        }
-                    });
-                }
-
-
                 setContentView(R.layout.activity_main);
                 Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+                NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+                View hview = navigationView.getHeaderView(0);
+                ivImage = (ImageView) hview.findViewById(R.id.profile_image);
+                name = hview.findViewById((R.id.username));
+                correo = hview.findViewById(R.id.correo);
+
+                refreshToken();
+                smartLocationFunctions();
+                putAvatar();
+
+
                 setSupportActionBar(toolbar);
 //coment
 
@@ -282,12 +216,8 @@ public class MainActivity extends AppCompatActivity
                 }
 
 
-                NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
-                View hview = navigationView.getHeaderView(0);
-                TextView correo = hview.findViewById(R.id.correo);
-                ImageView prof = hview.findViewById(R.id.profile_image);
-                if (bitmap != null) prof.setImageBitmap(bitmap);
+                if (bitmap != null) ivImage.setImageBitmap(bitmap);
 
                 chan = hview.findViewById(R.id.but);
                 chan.setOnClickListener(new View.OnClickListener() {
@@ -340,56 +270,6 @@ public class MainActivity extends AppCompatActivity
                 });
                 viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
                 //------------------------------------
-
-       /* chan = findViewById(R.id.but);
-        chan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent change_i = new Intent(getApplicationContext(),choose_image.class);
-                startActivity(change_i);
-            }
-        });*/
-
-/*
-                mAuth = FirebaseAuth.getInstance();
-                FirebaseUser currentUser2 = mAuth.getCurrentUser();
-                Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child(currentUser2.getUid());//currentUser.getUid()!!!!!!!!!!!!!!!!!!!!!!!!!
-                Log.w("UUUUUU", currentUser2.getUid());
-                ValueEventListener usuari1Listener = new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        // Get Post object and use the values to update the UI
-
-
-                        User u = dataSnapshot.getValue(User.class);
-                        Log.w("aaaaaaaaaaaaaaaaaaaaa", u.getAvatar());
-                        if (u != null) {
-                            if (ivImage == null) {
-                                Log.w("imagenulll", u.getAvatar());
-                            }
-                            ivImage = (ImageView) findViewById(R.id.profile_image);
-
-                            GlideApp.with(getApplicationContext()).load(u.getAvatar()).into(ivImage);
-
-                            TextView name = findViewById((R.id.username));
-                            name.setText(u.getName());
-
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        // Getting Post failed, log a message
-                        Log.w("Chat", "loadUser1:onCancelled", databaseError.toException());
-                    }
-                };
-
-                Ref_uid1.addValueEventListener(usuari1Listener);
-                */
-
-
-
-                
                 list = (ListView) findViewById(R.id.listV);
                 arrayList = new ArrayList<String>();
                 adapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,arrayList);
@@ -419,10 +299,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        String url = "http://10.4.41.143:3000/users/" + currentUser.getUid();
-        JsonTask t = new JsonTask();
-        t.execute(url);
+
     }
 
     private class JsonTask extends AsyncTask<String, String, String> {
@@ -476,13 +353,12 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String s) {
 
-
-            ivImage = (ImageView) findViewById(R.id.profile_image);
             try {
                 if (s != null) {
                     JSONObject obj = new JSONObject(s);
-                    GlideApp.with(getApplicationContext()).load(obj.getString("avatar")).into(ivImage);
-                    TextView name = findViewById((R.id.username));
+                    String url = obj.getString("avatar");
+                    GlideApp.with(getApplicationContext()).load(url).into(ivImage);
+                    //GlideApp.with(getApplicationContext()).load(obj.getString("avatar")).into(ivImage);
                     name.setText(obj.getString("complete_name"));
                 }
 
@@ -791,6 +667,57 @@ public class MainActivity extends AppCompatActivity
                 }
             });
 
+        }
+
+        public void smartLocationFunctions() {
+            SmartLocation.with(getApplicationContext()).location().start(locationListener);
+            if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
+                GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
+                        .addApi(LocationServices.API)
+                        .addConnectionCallbacks(this)
+                        .addOnConnectionFailedListener(this).build();
+                googleApiClient.connect();
+
+                LocationRequest locationRequest = LocationRequest.create();
+                locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                locationRequest.setInterval(5 * 1000);
+                locationRequest.setFastestInterval(2 * 1000);
+                LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                        .addLocationRequest(locationRequest);
+
+                //**************************
+                builder.setAlwaysShow(true); //this is the key ingredient
+                //**************************
+
+                PendingResult<LocationSettingsResult> result =
+                        LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+                result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+                    @Override
+                    public void onResult(@NonNull LocationSettingsResult result) {
+                        final Status status = result.getStatus();
+                        switch (status.getStatusCode()) {
+                            case LocationSettingsStatusCodes.SUCCESS:
+                                break;
+                            case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                                try {
+                                    status.startResolutionForResult(MainActivity.this, REQUEST_LOCATION);
+                                } catch (IntentSender.SendIntentException e) {
+                                }
+                                break;
+                            case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                                break;
+                        }
+                    }
+                });
+            }
+
+        }
+
+        public void putAvatar() {
+            FirebaseUser currentUser = mAuth.getCurrentUser();
+            String url = "http://10.4.41.143:3000/users/" + currentUser.getUid();
+            JsonTask t = new JsonTask();
+            t.execute(url);
         }
     }
 
