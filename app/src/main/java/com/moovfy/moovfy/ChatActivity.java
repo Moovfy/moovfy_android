@@ -259,6 +259,9 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    private void setScrollbar(){
+        mMessageRecycler.scrollToPosition(mMessageAdapter.getItemCount()-1);
+    }
     public void updateUsers() {
         String url = "https://10.4.41.143:3001/users/";
         JsonTask t = new JsonTask();
@@ -397,9 +400,6 @@ public class ChatActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setScrollbar(){
-        mMessageRecycler.scrollToPosition(mMessageAdapter.getItemCount()-1);
-    }
 
 
 
