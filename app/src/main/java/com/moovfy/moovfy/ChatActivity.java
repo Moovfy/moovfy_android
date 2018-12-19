@@ -356,10 +356,13 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        Intent intent = getIntent();
+        String rel = intent.getStringExtra("relation");
+        Log.d("RELATION", rel);
         optionsMenu = menu;
-        if (relation.equals("ok")) {
+        if (rel.equals("ok")) {
             optionsMenu.getItem(0).setTitle("Delete Friend");
-        } else if (relation.equals("donotshow")) {
+        } else if (rel.equals("donotshow")) {
             optionsMenu.removeItem(R.id.action_add);
         } else {
             optionsMenu.getItem(0).setTitle("Add to Friends");

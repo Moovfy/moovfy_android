@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -14,6 +15,7 @@ import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -28,9 +30,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -64,6 +68,7 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
@@ -74,6 +79,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.kosalgeek.android.photoutil.GalleryPhoto;
 import com.kosalgeek.android.photoutil.ImageLoader;
 import com.google.firebase.database.FirebaseDatabase;
 import com.moovfy.moovfy.map.MapFragment;
@@ -86,6 +95,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -130,11 +140,11 @@ public class MainActivity extends AppCompatActivity
     private final int REQUEST_PERMISSION_PHONE_STATE = 1;
     Button chan;
     final static int REQUEST_LOCATION = 199;
+    final static int REQUEST_IMAGE = 198;
     SearchView se;
-   ListView list;
+    ListView list;
     ArrayList<String> arrayList;
-   ArrayAdapter<String> adapter;
-
+    ArrayAdapter<String> adapter;
 
 
     /*
@@ -153,6 +163,9 @@ public class MainActivity extends AppCompatActivity
     TextView correo;
     DatabaseReference Ref_uid1;
 
+    //VARIABLES
+    GalleryPhoto galleryPhoto;
+    AlertDialog.Builder builder;
 
 
     @Override
@@ -162,13 +175,12 @@ public class MainActivity extends AppCompatActivity
 
         new NukeSSLCerts().nuke();
 
-        Boolean firstRun = getSharedPreferences("PREFERENCE",MODE_PRIVATE).getBoolean("firstRun",true);
+        Boolean firstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getBoolean("firstRun", true);
 
-        if(firstRun) {
-            Intent intro = new Intent(getApplicationContext(),MoovfyIntro.class);
+        if (firstRun) {
+            Intent intro = new Intent(getApplicationContext(), MoovfyIntro.class);
             startActivity(intro);
-        }
-        else {
+        } else {
 
             mAuth = FirebaseAuth.getInstance();
 
@@ -179,8 +191,7 @@ public class MainActivity extends AppCompatActivity
             if (firebase_uid.equals("")) { // || currentUser == null
                 Intent login = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(login);
-            }
-            else {
+            } else {
                 setContentView(R.layout.activity_main);
                 Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
                 NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -216,17 +227,10 @@ public class MainActivity extends AppCompatActivity
                 }
 
 
-
                 if (bitmap != null) ivImage.setImageBitmap(bitmap);
 
                 chan = hview.findViewById(R.id.but);
-                chan.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent change_i = new Intent(getApplicationContext(), choose_image.class);
-                        startActivity(change_i);
-                    }
-                });
+                initProfileButton(chan);
 
 
                 if (currentUser != null) {
@@ -272,8 +276,8 @@ public class MainActivity extends AppCompatActivity
                 //------------------------------------
                 list = (ListView) findViewById(R.id.listV);
                 arrayList = new ArrayList<String>();
-                adapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,arrayList);
-               list.setAdapter(adapter);
+                adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, arrayList);
+                list.setAdapter(adapter);
                 se = (SearchView) findViewById(R.id.searchView);
                 se.setOnQueryTextListener(this);
                 se.setOnCloseListener(this::onClose);
@@ -283,8 +287,8 @@ public class MainActivity extends AppCompatActivity
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         String a = adapter.getItem(position);
                         System.out.println(a);
-                        Intent i=new Intent(MainActivity.this, perfil.class);
-                        i.putExtra("name_c",a);
+                        Intent i = new Intent(MainActivity.this, perfil.class);
+                        i.putExtra("name_c", a);
                         startActivity(i);
 
                     }
@@ -370,355 +374,447 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    private void buscar(String s) {
+        String url = "https://10.4.41.143:3001/users/search/" + s;
 
-        private void buscar(String s) {
-            String url = "https://10.4.41.143:3001/users/search/" + s;
+        JsonArrayRequest jsonobj = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        Log.d("Respuesta", response.toString());
+                        adapter.clear();
+                        for (int i = 0; i < response.length(); ++i) {
+                            try {
+                                JSONObject objeto = response.getJSONObject(i);
+                                String usr = objeto.getString("complete_name");
 
-            JsonArrayRequest jsonobj = new JsonArrayRequest(Request.Method.GET, url, null,
-                    new Response.Listener<JSONArray>() {
-                        @Override
-                        public void onResponse(JSONArray response) {
-                            Log.d("Respuesta", response.toString());
-                            adapter.clear();
-                            for (int i = 0; i < response.length(); ++i) {
-                                try {
-                                    JSONObject objeto = response.getJSONObject(i);
-                                    String usr = objeto.getString("complete_name");
+                                arrayList.add(usr);
+                                adapter.notifyDataSetChanged();
+                                setListViewHeightBasedOnItems(list);
 
-                                    arrayList.add(usr);
-                                    adapter.notifyDataSetChanged();
-                                    setListViewHeightBasedOnItems(list);
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
                         }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.d("Error.Response", error.toString());
-                        }
                     }
-            );
-            queue.add(jsonobj);
-
-        }
-
-
-        private void pasar_datos(JSONObject json) {
-            String url = "https://10.4.41.143:3001/locations/addLocation";
-
-            JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url, json,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            Log.d("Response", response.toString());
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.d("Error.Response", error.toString());
-                        }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Error.Response", error.toString());
                     }
-            );
-            queue.add(jsonobj);
+                }
+        );
+        queue.add(jsonobj);
+
+    }
 
 
+    private void pasar_datos(JSONObject json) {
+        String url = "https://10.4.41.143:3001/locations/addLocation";
+
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.PUT, url, json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("Response", response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Error.Response", error.toString());
+                    }
+                }
+        );
+        queue.add(jsonobj);
+
+
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        // getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
 
-        @Override
-        public void onBackPressed() {
-            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
-            } else {
-                super.onBackPressed();
-            }
-        }
-
-        @Override
-        public boolean onCreateOptionsMenu(Menu menu) {
-            // Inflate the menu; this adds items to the action bar if it is present.
-            // getMenuInflater().inflate(R.menu.main, menu);
-            return true;
-        }
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            // Handle action bar item clicks here. The action bar will
-            // automatically handle clicks on the Home/Up button, so long
-            // as you specify a parent activity in AndroidManifest.xml.
-            int id = item.getItemId();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
 /*
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
 */
-            return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_chat) {
+
+            Intent intent = new Intent(this, ChatsActivity.class);
+            startActivity(intent);
+            // Handle the camera action
+        } else if (id == R.id.nav_edit_profile) {
+
+            Intent intent = new Intent(this, EditProfile.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_black_list) {
+            Intent intent = new Intent(this, BlackListActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_help) {
+
+            Intent intent = new Intent(this, HelpActivity.class);
+            startActivity(intent);
+
+        } else if (id == R.id.nav_logout) {
+            FirebaseAuth.getInstance().signOut();
+            getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit().putString("user_uid", "").commit();
+            Intent login = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(login);
         }
 
-        @SuppressWarnings("StatementWithEmptyBody")
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+
+    //LOCATION FUNCTIONS
+    OnLocationUpdatedListener locationListener = new OnLocationUpdatedListener() {
         @Override
-        public boolean onNavigationItemSelected(MenuItem item) {
-            // Handle navigation view item clicks here.
-            int id = item.getItemId();
-
-            if (id == R.id.nav_chat) {
-
-                Intent intent = new Intent(this, ChatsActivity.class);
-                startActivity(intent);
-                // Handle the camera action
-            } else if (id == R.id.nav_edit_profile) {
-
-                Intent intent = new Intent(this, EditProfile.class);
-                startActivity(intent);
-            } else if (id == R.id.nav_black_list) {
-                Intent intent = new Intent(this, BlackListActivity.class);
-                startActivity(intent);
-            } else if (id == R.id.nav_help) {
-
-                Intent intent = new Intent(this, HelpActivity.class);
-                startActivity(intent);
-
-            } else if (id == R.id.nav_logout) {
-                FirebaseAuth.getInstance().signOut();
-                getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit().putString("user_uid", "").commit();
-                Intent login = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(login);
-            }
-
-            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            drawer.closeDrawer(GravityCompat.START);
-            return true;
-        }
-
-
-        //LOCATION FUNCTIONS
-        OnLocationUpdatedListener locationListener = new OnLocationUpdatedListener() {
-            @Override
-            public void onLocationUpdated(Location location) {
-                double lat = location.getLatitude();
-                double lng = location.getLongitude();
-                System.out.println("LOCATION CHANGED: latitude " + lat + " longitude " + lng);
-                Toast.makeText(getApplicationContext(), "LOCATION CHANGED: latitude " + lat + " longitude " + lng, Toast.LENGTH_LONG).show();
-                String firebase_uid = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user_uid", "");
-                if (firebase_uid != "") {
-                    FirebaseUser user = mAuth.getCurrentUser();
-                    String userUid = user.getUid();
-                    JSONObject json = new JSONObject();
-                    try {
-                        json.put("userUID", userUid);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        json.put("latitude", location.getLatitude());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        json.put("longitude", location.getLongitude());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    pasar_datos(json);
+        public void onLocationUpdated(Location location) {
+            double lat = location.getLatitude();
+            double lng = location.getLongitude();
+            System.out.println("LOCATION CHANGED: latitude " + lat + " longitude " + lng);
+            Toast.makeText(getApplicationContext(), "LOCATION CHANGED: latitude " + lat + " longitude " + lng, Toast.LENGTH_LONG).show();
+            String firebase_uid = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user_uid", "");
+            if (firebase_uid != "") {
+                FirebaseUser user = mAuth.getCurrentUser();
+                String userUid = user.getUid();
+                JSONObject json = new JSONObject();
+                try {
+                    json.put("userUID", userUid);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            }
-        };
-
-        Runnable locationRunnable = new Runnable() {
-            @Override
-            public void run() {
-                SmartLocation.with(getApplicationContext()).location().start(locationListener);
-            }
-        };
-
-        //callback method
-        @Override
-        protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-            final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
-            switch (requestCode) {
-                case REQUEST_LOCATION:
-                    switch (resultCode) {
-                        case Activity.RESULT_OK:
-                            // All required changes were successfully made
-                            Toast.makeText(getApplicationContext(), "Gps enabled", Toast.LENGTH_SHORT).show();
-                            break;
-                        case Activity.RESULT_CANCELED:
-                            // The user was asked to change settings, but chose not to
-                            Toast.makeText(getApplicationContext(), "Gps Canceled", Toast.LENGTH_SHORT).show();
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-            }
-        }
-
-
-        @Override
-        public void onConnected(@Nullable Bundle bundle) {
-
-        }
-
-        @Override
-        public void onConnectionSuspended(int i) {
-
-        }
-
-        @Override
-        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-        }
-
-        @Override
-        public boolean onQueryTextSubmit(String s) {
-            buscar(s);
-            return true;
-        }
-
-        @Override
-        public boolean onQueryTextChange(String s) {
-            buscar(s);
-            return true;
-        }
-
-        public boolean setListViewHeightBasedOnItems(ListView listView) {
-
-            ListAdapter listAdapter = listView.getAdapter();
-            if (listAdapter != null) {
-
-                int numberOfItems = listAdapter.getCount();
-
-                // Get total height of all items.
-                int totalItemsHeight = 0;
-
-                if (numberOfItems <= 10) {
-                    for (int itemPos = 0; itemPos < numberOfItems; itemPos++) {
-                        View item = listAdapter.getView(itemPos, null, listView);
-                        float px = 500 * (listView.getResources().getDisplayMetrics().density);
-                        item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-                        totalItemsHeight += item.getMeasuredHeight();
-                    }
-                } else {
-                    for (int itemPos = 0; itemPos < 10; itemPos++) {
-                        View item = listAdapter.getView(itemPos, null, listView);
-                        float px = 500 * (listView.getResources().getDisplayMetrics().density);
-                        item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-                        totalItemsHeight += item.getMeasuredHeight();
-                    }
+                try {
+                    json.put("latitude", location.getLatitude());
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+                try {
+                    json.put("longitude", location.getLongitude());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                pasar_datos(json);
+            }
+        }
+    };
+
+    Runnable locationRunnable = new Runnable() {
+        @Override
+        public void run() {
+            SmartLocation.with(getApplicationContext()).location().start(locationListener);
+        }
+    };
+
+    //callback method
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
+        switch (requestCode) {
+            case REQUEST_LOCATION:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        // All required changes were successfully made
+                        Toast.makeText(getApplicationContext(), "Gps enabled", Toast.LENGTH_SHORT).show();
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        // The user was asked to change settings, but chose not to
+                        Toast.makeText(getApplicationContext(), "Gps Canceled", Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case REQUEST_IMAGE:
+                if (resultCode == RESULT_OK) {
+                    Uri uri = data.getData();
+                    galleryPhoto.setPhotoUri(uri);
+                    String photoPath = galleryPhoto.getPath();
+                    putImageInStorage(data);
+                }
+                break;
+        }
+    }
 
 
-                // Get total height of all item dividers.
-                int totalDividersHeight = listView.getDividerHeight() *
-                        (numberOfItems - 1);
-                // Get padding
-                int totalPadding = listView.getPaddingTop() + listView.getPaddingBottom();
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
 
-                // Set list height.
-                ViewGroup.LayoutParams params = listView.getLayoutParams();
+    }
 
+    @Override
+    public void onConnectionSuspended(int i) {
 
-                params.height = totalItemsHeight + totalDividersHeight + totalPadding;
+    }
 
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-                listView.setLayoutParams(params);
-                listView.requestLayout();
-                return true;
+    }
 
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        buscar(s);
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String s) {
+        buscar(s);
+        return true;
+    }
+
+    public boolean setListViewHeightBasedOnItems(ListView listView) {
+
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter != null) {
+
+            int numberOfItems = listAdapter.getCount();
+
+            // Get total height of all items.
+            int totalItemsHeight = 0;
+
+            if (numberOfItems <= 10) {
+                for (int itemPos = 0; itemPos < numberOfItems; itemPos++) {
+                    View item = listAdapter.getView(itemPos, null, listView);
+                    float px = 500 * (listView.getResources().getDisplayMetrics().density);
+                    item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                    totalItemsHeight += item.getMeasuredHeight();
+                }
             } else {
-                return false;
+                for (int itemPos = 0; itemPos < 10; itemPos++) {
+                    View item = listAdapter.getView(itemPos, null, listView);
+                    float px = 500 * (listView.getResources().getDisplayMetrics().density);
+                    item.measure(View.MeasureSpec.makeMeasureSpec((int) px, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                    totalItemsHeight += item.getMeasuredHeight();
+                }
             }
 
-        }
+
+            // Get total height of all item dividers.
+            int totalDividersHeight = listView.getDividerHeight() *
+                    (numberOfItems - 1);
+            // Get padding
+            int totalPadding = listView.getPaddingTop() + listView.getPaddingBottom();
+
+            // Set list height.
+            ViewGroup.LayoutParams params = listView.getLayoutParams();
 
 
-        @Override
-        public boolean onClose() {
-            adapter.clear();
-            adapter.notifyDataSetChanged();
-            setListViewHeightBasedOnItems(list);
+            params.height = totalItemsHeight + totalDividersHeight + totalPadding;
+
+
+            listView.setLayoutParams(params);
+            listView.requestLayout();
+            return true;
+
+        } else {
             return false;
         }
 
-        public void refreshToken() {
-            FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+    }
+
+
+    @Override
+    public boolean onClose() {
+        adapter.clear();
+        adapter.notifyDataSetChanged();
+        setListViewHeightBasedOnItems(list);
+        return false;
+    }
+
+    public void refreshToken() {
+        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+            @Override
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                if (!task.isSuccessful()) {
+                    Log.w("getInstanceIdFailed", "Failed", task.getException());
+                    return;
+                }
+
+                String token = task.getResult().getToken();
+                Log.d("FIREBASE MESSAGING", "Refreshed token: " + token);
+                DatabaseReference mDatabase;
+                mDatabase = FirebaseDatabase.getInstance().getReference();
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                String userUid = user.getUid();
+                mDatabase.child("users").child(userUid).child("token").setValue(token);
+
+            }
+        });
+
+    }
+
+    public void smartLocationFunctions() {
+        SmartLocation.with(getApplicationContext()).location().start(locationListener);
+        if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
+            GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this).build();
+            googleApiClient.connect();
+
+            LocationRequest locationRequest = LocationRequest.create();
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationRequest.setInterval(5 * 1000);
+            locationRequest.setFastestInterval(2 * 1000);
+            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                    .addLocationRequest(locationRequest);
+
+            //**************************
+            builder.setAlwaysShow(true); //this is the key ingredient
+            //**************************
+
+            PendingResult<LocationSettingsResult> result =
+                    LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+            result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
                 @Override
-                public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                    if (!task.isSuccessful()) {
-                        Log.w("getInstanceIdFailed", "Failed", task.getException());
-                        return;
+                public void onResult(@NonNull LocationSettingsResult result) {
+                    final Status status = result.getStatus();
+                    switch (status.getStatusCode()) {
+                        case LocationSettingsStatusCodes.SUCCESS:
+                            break;
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            try {
+                                status.startResolutionForResult(MainActivity.this, REQUEST_LOCATION);
+                            } catch (IntentSender.SendIntentException e) {
+                            }
+                            break;
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            break;
                     }
-
-                    String token = task.getResult().getToken();
-                    Log.d("FIREBASE MESSAGING", "Refreshed token: " + token);
-                    DatabaseReference mDatabase;
-                    mDatabase = FirebaseDatabase.getInstance().getReference();
-                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                    String userUid = user.getUid();
-                    mDatabase.child("users").child(userUid).child("token").setValue(token);
-
                 }
             });
-
         }
 
-        public void smartLocationFunctions() {
-            SmartLocation.with(getApplicationContext()).location().start(locationListener);
-            if (!SmartLocation.with(getApplicationContext()).location().state().isGpsAvailable()) {
-                GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
-                        .addApi(LocationServices.API)
-                        .addConnectionCallbacks(this)
-                        .addOnConnectionFailedListener(this).build();
-                googleApiClient.connect();
+    }
 
-                LocationRequest locationRequest = LocationRequest.create();
-                locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                locationRequest.setInterval(5 * 1000);
-                locationRequest.setFastestInterval(2 * 1000);
-                LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                        .addLocationRequest(locationRequest);
+    public void putAvatar() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        String url = "http://10.4.41.143:3000/users/" + currentUser.getUid();
+        JsonTask t = new JsonTask();
+        t.execute(url);
+    }
 
-                //**************************
-                builder.setAlwaysShow(true); //this is the key ingredient
-                //**************************
+    public void initProfileButton(Button chan) {
+        galleryPhoto = new GalleryPhoto(getApplicationContext());
+        chan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Change profile image");
 
-                PendingResult<LocationSettingsResult> result =
-                        LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
-                result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+                final Button button = new Button(MainActivity.this);
+                button.setText("From gallery");
+                button.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onResult(@NonNull LocationSettingsResult result) {
-                        final Status status = result.getStatus();
-                        switch (status.getStatusCode()) {
-                            case LocationSettingsStatusCodes.SUCCESS:
-                                break;
-                            case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                                try {
-                                    status.startResolutionForResult(MainActivity.this, REQUEST_LOCATION);
-                                } catch (IntentSender.SendIntentException e) {
-                                }
-                                break;
-                            case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                                break;
-                        }
+                    public void onClick(View v) {
+                        startActivityForResult(galleryPhoto.openGalleryIntent(), REQUEST_IMAGE);
                     }
                 });
+                builder.setView(button);
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.show();
             }
+        });
 
-        }
+    }
 
-        public void putAvatar() {
-            FirebaseUser currentUser = mAuth.getCurrentUser();
-            String url = "http://10.4.41.143:3000/users/" + currentUser.getUid();
-            JsonTask t = new JsonTask();
-            t.execute(url);
+    protected void putImageInStorage(Intent data) {
+        if (data != null) {
+            final Uri uri = data.getData();
+            Log.d("Chat", "Uri: " + uri.toString());
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference("Perfil").child(uri.getLastPathSegment());
+            storageReference.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+
+
+                            FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                            FirebaseUser currentUser = mAuth.getCurrentUser();
+                            String uid = currentUser.getUid();
+                            //uid = "2"; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            DatabaseReference Ref_uid1 = FirebaseDatabase.getInstance().getReference("users").child(uid).child("avatar");
+                            Ref_uid1.setValue(uri.toString());
+                            //acces api per guardar el avatar
+                            queue = Volley.newRequestQueue(getApplicationContext());
+                            String url2 = "http://10.4.41.143:3000/users/updateavatar/" + uid;
+                            JSONObject obj = new JSONObject();
+
+                            try {
+                                obj.put("avatar", uri.toString());
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            JsonObjectRequest jsonobj2 = new JsonObjectRequest(Request.Method.PUT, url2, obj,
+                                    new Response.Listener<JSONObject>() {
+                                        @Override
+                                        public void onResponse(JSONObject response) {
+                                            Log.d("Response", response.toString());
+                                            putAvatar();
+                                        }
+                                    },
+                                    new Response.ErrorListener() {
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
+                                            Log.d("Error.Response", error.toString());
+                                        }
+                                    }
+                            );
+
+                            queue.add(jsonobj2);
+
+                        }
+                    });
+                }
+            });
         }
     }
+}
 
 
