@@ -157,7 +157,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     private void updateList() {
         userList.clear();
         uids.clear();
-        String url = "http://10.4.41.143:3000/near/";
+        String url = "https://10.4.41.143:3001/near/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
             url += currentFirebaseUser.getUid();
@@ -239,7 +239,7 @@ public class CloseFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                 HttpURLConnection con = null;
                                 BufferedReader rd = null;
                                 try {
-                                    URL purl = new URL("http://10.4.41.143:3000/users/" + uid);
+                                    URL purl = new URL("https://10.4.41.143:3001/users/" + uid);
                                     con = (HttpURLConnection) purl.openConnection();
                                     StringBuffer buff = new StringBuffer();
                                     con.connect();

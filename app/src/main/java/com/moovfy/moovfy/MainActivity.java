@@ -726,7 +726,7 @@ public class MainActivity extends AppCompatActivity
 
     public void putAvatar() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        String url = "http://10.4.41.143:3000/users/" + currentUser.getUid();
+        String url = "https://10.4.41.143:3001/users/" + currentUser.getUid();
         JsonTask t = new JsonTask();
         t.execute(url);
     }
@@ -783,7 +783,7 @@ public class MainActivity extends AppCompatActivity
                             Ref_uid1.setValue(uri.toString());
                             //acces api per guardar el avatar
                             queue = Volley.newRequestQueue(getApplicationContext());
-                            String url2 = "http://10.4.41.143:3000/users/updateavatar/" + uid;
+                            String url2 = "https://10.4.41.143:3001/users/updateavatar/" + uid;
                             JSONObject obj = new JSONObject();
 
                             try {

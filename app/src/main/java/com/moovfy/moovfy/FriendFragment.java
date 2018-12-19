@@ -128,7 +128,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
     private void updateList() {
         userList.clear();
         uids.clear();
-        String url = "http://10.4.41.143:3000/friends/";
+        String url = "https://10.4.41.143:3001/friends/";
         FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
         if (currentFirebaseUser != null) {
             url += currentFirebaseUser.getUid();
@@ -175,7 +175,7 @@ public class FriendFragment extends Fragment implements SwipeRefreshLayout.OnRef
                                 HttpURLConnection con = null;
                                 BufferedReader rd = null;
                                 try {
-                                    URL purl = new URL("http://10.4.41.143:3000/users/" + uid);
+                                    URL purl = new URL("https://10.4.41.143:3001/users/" + uid);
                                     con = (HttpURLConnection) purl.openConnection();
                                     StringBuffer buff = new StringBuffer();
                                     con.connect();
